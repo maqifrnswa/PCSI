@@ -9,6 +9,9 @@ PCSI is a way of transmitting imaging data over unconnected networks where recei
 ### PCSI Reference Application
 A remote amateur radio station on a high altitude balloon or satellite transmitting images back to ground stations. Remote station is assumed to have little computing power, so minimal processing will occur on the remote state. The link is unconnected (i.e., one directional broadcasts) and will lead to corrupted/lost packets.
 
+### How to use the software
+Demo loading an image and transmitting over a TNC over KISS. Demo the receiving software for listening for packets on KISS and reconstructing the image.
+
 ### How does it work (summary)
 Using compressed sensing imaging, one can reconstruct full images from random selections of pixels from that image. We therefore transmit random selections of pixels in each packet so that each packet contains information from the entire image, and combining multiple packets improves received image fidelity (e.g., resolution). A good intro is here: http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/.
 
@@ -48,6 +51,9 @@ Given a bitmapped image to transfer, follow the following proceedures
   * Black and white (Y only) pixels follow in a binary stream of Y values
 * zero padding for byte alignment as needed for packet protocol. If encoding in base91 (below), zero padding not required.
 
+#### Pseudo-random Number Generation for Picking Pixels
+Compressed sensing imaging requires that the measurements are uncorellated in the sparse domain that is used to reconstruct the image. Taking random samples ensures this condition, however, both the transmitter and receiver need to know which pixel values correspond to which pixels in the image. To do this, PCSI uses a "Linear Congruential Generator" (https://en.wikipedia.org/wiki/Linear_congruential_generator) as a pseudo-random number generator using gcc's default coefficients (modulus=2^31, a=1103515245, c=12345, starting with a seed=1) and combined with the modern "Fisher Yates shuffle algorithm"  https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm to generate a random list of the pixels to be sent. See reference code for details. This will allow all receivers and the transmitter to generate identical lists of order that pixels will be transmitted. Since every packet has the same number of pixels, the packet ID will give the receiver the starting pixel number from which the list of pixels received in the packet can be extracted.
+
 #### PCSI Payload base91 Encoding
 If transmitting over channels the require/prefer printable ascii text, the binary stream can be converted to base91 in the following way. This is combination of APRS base91 and basE91. Compared to basE91, this is simpler and deterministic at the cost of slightly more overhead
 1. While there are 13 bits or more to convert, read in 13 bits
@@ -59,10 +65,17 @@ If transmitting over channels the require/prefer printable ascii text, the binar
    1. Read in and zero pad (to the right) the remaining its so that there are 6 bits total.
    1. Convert those 6 bits to one ASCII byte using bits+33
 
-## AX.25 and APRS compatible packets
+### AX.25 and APRS compatible packets
 PCSI can be used in AX.25 APRS compatible packets (even if not sent over the APRS network) by the following:
 * The AX.25 Destination Address is set to PCSI with an SSID chosen by user. This indicates a PCSI altnet intended for anyone interested in PCSI to see. *IS THIS CORRECT? SHOULD IT BE APZXXX INSTEAD?*
 * The information field of the AX.25 packet has the following format
   * 3 Bytes: `{{V`
     * Per the APRS spec, {{ indicates an experimental user-defined packet, and V is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
   * The total number of bytes in the information field will be less than or equal to 256 bytes.
+
+## Reconstructing PCSI Images
+There is no specefication or standard on how to reconstruct the images. Users can experiment with different methods and find what is appropriate. The reference implementation follows these steps (based off of http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/)
+1. Decode all the pixel values and pixel numbers from as many packets as have been successfully received.
+1. For each color channel (Y, Cb, Cr), use OLW-QN for basis pursuit https://en.wikipedia.org/wiki/Limited-memory_BFGS#OWL-QN to find the discrete cosine transform (DCT) coefficients that best fit the received data AND minimizes the L1 norm. This is the key to compressed sensing! Reference python implementation uses https://bitbucket.org/rtaylor/pylbfgs/src/master/
+1. After finding the DCT coefficients, use the inverse DCT to generate the color channels for the image.
+1. Convert from YCbCr to RBG, and save the image!
