@@ -1,5 +1,6 @@
 # Packet Compressed Sensing Imaging (PCSI)
 This repository holds the specefication and a usable reference implementation of PCSI.
+
 PCSI spec v0.0.0 (unreleased, versioning will follow semver 2.0)
 
 ## What is PCSI?
@@ -27,4 +28,41 @@ Using compressed sensing imaging, one can reconstruct full images from random se
 * PCSI includes chroma compression and sparse sampling - so it basically is doing JPEG compression without doing any encoding or decoding at the transmitting station.
 
 ## PCSI Spec
-For the reference application, we will use AX.25 frames which are the defacto amateur radio packet standard.
+The PCSI spec merely defines the packet payload. It can be used in any packet protocol. For example, the reference implementation is for APRS compatible AX.25 frames. The payload is designed to be similar to SSDV.
+
+### Packet preparation
+Given a bitmapped image to transfer, follow the following proceedures
+1. Using a pseudo-random number generator, generate the sequence of pixels to be transmitted
+1. Given the number of bits available in the payload, the desired chroma compression level, and the desired color bit depth to transmit, determine the list of pixels to transmit that will be full color and solely back and white.
+1. Prepare the packet payload below, converting full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec. Each packet contains the identical number of YCbCr pixels and Y pixels.
+
+### PCSI Payload Format
+* 1 byte image ID (uint8 from 0-255)
+* 1 byte number of lines in the image divided by 16 (uint8 with a max of 4096 lines)
+* 1 byte number of columns in the image divided by 16 (uint8 with a max of 4096 columns)
+* 2 bytes Packet ID (uint16 0-65535) to be used as the starting point of the pseudo-random pixel list
+* 1 byte: Number of full color pixels transmitted (number of YCbCr pixels as uint8 0-255)
+* 1 byte: Color depth (uint8) encoded as (color depth/3 -1). e.g., 24bit color = 7. *This only uses 3 bits, so there are 5 bits available for future use*
+* N bits: Image data. Binary stream of pixel data in the sequence determined by the pseudo random number generator algorithim starting with the pixel associated with the Packet ID. Bit depth for each channel is determined by color depth.
+  * Full color (YCbCr) pixels listed first as a binary stream in YCbCr format for the number of full color images determined in the header
+  * Black and white (Y only) pixels follow in a binary stream of Y values
+* zero padding for byte alignment as needed for packet protocol. If encoding in base91 (below), zero padding not required.
+
+#### PCSI Payload base91 Encoding
+If transmitting over channels the require/prefer printable ascii text, the binary stream can be converted to base91 in the following way. This is combination of APRS base91 and basE91. Compared to basE91, this is simpler and deterministic at the cost of slightly more overhead
+1. While there are 13 bits or more to convert, read in 13 bits
+  1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
+1. Next, if there are less than thirteen and 7 or more bits available (the end of the stream)
+  1. Read in and zero pad (to the right) the remaining bits so that there are 13 bits total.
+  1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
+1. If there are 6 or few bits remaining
+  1. Read in and zero pad (to the right) the remaining its so that there are 6 bits total.
+  1. Convert those 6 bits to one ASCII byte using bits+33
+
+## AX.25 and APRS compatible packets
+PCSI can be used in AX.25 APRS compatible packets (even if not sent over the APRS network) by the following:
+* The AX.25 Destination Address is set to PCSI with an SSID chosen by user. This indicates a PCSI altnet intended for anyone interested in PCSI to see. *IS THIS CORRECT? SHOULD IT BE APZXXX INSTEAD?*
+* The information field of the AX.25 packet has the following format
+  * 3 Bytes: `{{V`
+    * Per the APRS spec, {{ indicates an experimental user-defined packet, and V is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
+  * The total number of bytes in the information field will be less than or equal to 256 bytes.
