@@ -51,13 +51,13 @@ Given a bitmapped image to transfer, follow the following proceedures
 #### PCSI Payload base91 Encoding
 If transmitting over channels the require/prefer printable ascii text, the binary stream can be converted to base91 in the following way. This is combination of APRS base91 and basE91. Compared to basE91, this is simpler and deterministic at the cost of slightly more overhead
 1. While there are 13 bits or more to convert, read in 13 bits
-  1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
+   1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
 1. Next, if there are less than thirteen and 7 or more bits available (the end of the stream)
-  1. Read in and zero pad (to the right) the remaining bits so that there are 13 bits total.
-  1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
+   1. Read in and zero pad (to the right) the remaining bits so that there are 13 bits total.
+   1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
 1. If there are 6 or few bits remaining
-  1. Read in and zero pad (to the right) the remaining its so that there are 6 bits total.
-  1. Convert those 6 bits to one ASCII byte using bits+33
+   1. Read in and zero pad (to the right) the remaining its so that there are 6 bits total.
+   1. Convert those 6 bits to one ASCII byte using bits+33
 
 ## AX.25 and APRS compatible packets
 PCSI can be used in AX.25 APRS compatible packets (even if not sent over the APRS network) by the following:
