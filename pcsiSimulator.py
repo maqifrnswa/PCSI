@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# Adapted from
+# http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/
 
-#import os
+import os
 import numpy as np
 from pylbfgs import owlqn
 import imageio
@@ -8,6 +10,7 @@ import scipy.fftpack as spfft
 # import matplotlib.pyplot as plt
 # from base91 import rgb2ycbcr, ycbcr2rgb, numPixelsSent  # rename this module
 from pcsi.colorconv import rgb2ycbcr, ycbcr2rgb, numPixelsSent
+import argparse
 
 def dct2(x):
     """Return 2D discrete cosine transform.
@@ -45,24 +48,48 @@ def evaluate(x, g, step):
 
     # project residual vector (k x 1) onto blank image (ny x nx)
     Axb2 = np.zeros(x2.shape)
-    Axb2.T.flat[ri] = Axb # fill columns-first
+    Axb2.T.flat[ri] = Axb  # fill columns-first
 
     # A'(Ax-b) is just the 2D dct of Axb2
     AtAxb2 = 2 * dct2(Axb2)
-    AtAxb = AtAxb2.T.reshape(x.shape) # stack columns
+    AtAxb = AtAxb2.T.reshape(x.shape)  # stack columns
 
     # copy over the gradient vector
     np.copyto(g, AtAxb)
 
     return fx
 
+
+parser = argparse.ArgumentParser(description="Command line tool to simulate PCSI",
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i", "--imagefile", type=str, default='HAB2sstv.bmp',
+                    help="Input image to transmit (24bit color, any filetype)")
+#parser.add_argument("imagefile", type=str,
+#                    help="Input image to transmit (24bit color, any filetype)")
+
+parser.add_argument("-b", "--bitdepth", type=int, default=24,
+                    help="Bit depth transmit (e.g., 24 for 24-bit color)")
+parser.add_argument("-N", "--numpackets", type=int, nargs='*', default=100,
+                    help="Number of packets to simulate")
+parser.add_argument("-c", "--chromacomp", type=int, default=1, nargs='*',
+                    help="Chroma Compression ratio")
+parser.add_argument("-a", "--bitsAvailable", type=int, default=1992,
+                    help="Number of bits available in payload for image data")
+parser.add_argument("-o", "--outfolder", type=str, default="results",
+                    help="Output folder name")
+
+
+args = parser.parse_args()
+print(args.chromacomp)
 # Normally we assume 24 bit color. Can simulate what happens if we transmit
 # lower color depth.
-transmittedColorDepth = 24 # MULTIPLE OF 3!!
+transmittedColorDepth = args.bitdepth # MULTIPLE OF 3!!
 bitDepthToRemove = (24-transmittedColorDepth)/3  # per channel
 
-numberPackets = (100, 300 ) #, 300, 1000)
-chromaCompressionList = (1,8,16,)  # chromaCompression is the total number of pix/ YCbCr pix
+numberPackets = args.numpackets
+#numberPackets = (100, ) #, 300, 1000)
+chromaCompressionList= args.chromacomp
+#chromaCompressionList = (16,)  # chromaCompression is the total number of pix/ YCbCr pix
 # sampleSizes are the number of YCbCr and Y only pixels received in n packets
 
 
@@ -70,7 +97,15 @@ chromaCompressionList = (1,8,16,)  # chromaCompression is the total number of pi
 # read original image
 # Xorig = imageio.imread('escher_waterfall.jpeg')
 # Xorig = imageio.imread('HAB.jpg')
-Xorig = imageio.imread('HAB2sstv.bmp')
+Xorig = imageio.imread(args.imagefile)
+
+imagefileName, ext = args.imagefile.split('.')
+if not os.path.exists('results_' + imagefileName):
+    os.makedirs('results_' + imagefileName)
+
+if not os.path.exists(args.outfolder):
+    os.makedirs(args.outfolder)
+
 Xorig = rgb2ycbcr(Xorig)
 ny,nx,nchan = Xorig.shape
 
@@ -80,7 +115,7 @@ for chromaCompression in chromaCompressionList:
     sampleSizes = [numPixelsSent(n,
                                  transmittedColorDepth,
                                  chromaCompression,
-                                 bitsAvailable = 1992) for n in numberPackets]
+                                 bitsAvailable = args.bitsAvailable) for n in numberPackets]
     # for each sample size
     Z = [np.zeros(Xorig.shape, dtype='uint8') for s in sampleSizes]
     masks = [np.zeros(Xorig.shape, dtype='uint8') for s in sampleSizes]
@@ -127,12 +162,12 @@ for chromaCompression in chromaCompressionList:
             Xa[Xa>255] = 255
             Z[i][:,:,j] = Xa.astype('uint8')
         Z[i][:,:,:] = ycbcr2rgb(Z[i][:,:,:])
-        imageio.imwrite('results_HAB2sstv/CSimage' + str(numberPackets[i]) +'p_'
+        imageio.imwrite(args.outfolder + '/' + imagefileName + str(numberPackets[i]) +'p_'
                         + str(transmittedColorDepth) + 'b_'
                         + str(chromaCompression) +'.bmp', Z[i])
 
 
-Xorig = ycbcr2rgb(Xorig)
+#Xorig = ycbcr2rgb(Xorig)
 
 
 
