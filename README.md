@@ -41,7 +41,7 @@ The PCSI spec merely defines the packet payload. It can be used in any packet pr
 Given a bitmapped image to transfer, follow the following proceedures
 1. Using a pseudo-random number generator, generate the sequence of pixels to be transmitted
 1. Given the number of bits available in the payload, the desired chroma compression level, and the desired color bit depth to transmit, determine the list of pixels to transmit that will be full color and solely back and white.
-1. Prepare the packet payload below, converting full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec. Each packet contains the identical number of YCbCr pixels and Y pixels.
+1. Prepare the packet payload below, converting full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec. All packets consist of the same number of pixels (e.g., every packet for an image has exactly 25 YCbCr pixels and 75 Y only pixels for a total of 100 pixels. You can choose whatever numbers you want, as along as they are the same for every packet of the image).
 
 ### PCSI Payload Format
 * 1 byte image ID (uint8 from 0-255)
