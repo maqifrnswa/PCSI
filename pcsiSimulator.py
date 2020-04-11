@@ -132,8 +132,11 @@ for chromaCompression in chromaCompressionList:
             # extract channel
             X = Xorig[:,:,j].squeeze()
 
-            # simulate color depth transmitted - figure out better sim?
-            X = np.around(X / 2.**bitDepthToRemove) * 2.**bitDepthToRemove
+            # simulate color depth transmitted
+            X = np.around(
+                    np.around(X /(2**8-1) * (2**(transmittedColorDepth/3)-1))
+                    / (2**(transmittedColorDepth/3)-1) * (2**8-1)
+                    )
             X[X>255] = 255
             # X = (X>>bitDepthToRemove)<<bitDepthToRemove
             # X = np.around(X / ((2**8)-1) * ((2**(transmittedColorDepth/3))-1))
