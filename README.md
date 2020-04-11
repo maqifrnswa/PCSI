@@ -37,11 +37,14 @@ Using compressed sensing imaging, one can reconstruct full images from random se
 ## PCSI Spec
 The PCSI spec merely defines the packet payload. It can be used in any packet protocol. For example, the reference implementation is for APRS compatible AX.25 frames. The payload is designed to be similar to SSDV.
 
-### Packet preparation
+### Packet Payload Preparation
 Given a bitmapped image to transfer, follow the following proceedures
 1. Using a pseudo-random number generator, generate the sequence of pixels to be transmitted
-1. Given the number of bits available in the payload, the desired chroma compression level, and the desired color bit depth to transmit, determine the list of pixels to transmit that will be full color and solely back and white.
-1. Prepare the packet payload below, converting full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec. All packets consist of the same number of pixels (e.g., every packet for an image has exactly 25 YCbCr pixels and 75 Y only pixels for a total of 100 pixels. You can choose whatever numbers you want, as along as they are the same for every packet of the image).
+1. Given the number of bits available in the payload (e.g., AX.25 UI frames have 256 bytes minus 7 bytes of image info equals 1992 bits total), the desired chroma compression level, and the desired color bit depth to transmit, determine the list of pixels to transmit that will be full color and solely back and white.
+  1. All packets consist of the same number of pixels (e.g., every packet for an image has exactly 25 YCbCr pixels and 75 Y only pixels for a total of 100 pixels. You can choose whatever numbers you want, as along as they are the same for every packet of the image).
+1. Prepare the packet payload
+  1. Convert full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec.
+  1. If color bit depth is being reduced, binary shift the pixels for the desired bit depth.
 
 ### PCSI Payload Format
 * 1 byte image ID (uint8 from 0-255)
@@ -53,7 +56,7 @@ Given a bitmapped image to transfer, follow the following proceedures
 * N bits: Image data. Binary stream of pixel data in the sequence determined by the pseudo random number generator algorithim starting with the pixel associated with the Packet ID. Bit depth for each channel is determined by color depth.
   * Full color (YCbCr) pixels listed first as a binary stream in YCbCr format for the number of full color images determined in the header
   * Black and white (Y only) pixels follow in a binary stream of Y values
-* zero padding for byte alignment as needed for packet protocol. If encoding in base91 (below), zero padding not required.
+  * zero padding for byte alignment as needed for packet protocol. If encoding in base91 (below), zero padding not required.
 
 #### Pseudo-random Number Generation for Picking Pixels
 Compressed sensing imaging requires that the measurements are uncorellated in the sparse domain that is used to reconstruct the image. Taking random samples ensures this condition, however, both the transmitter and receiver need to know which pixel values correspond to which pixels in the image. To do this, PCSI uses a "Linear Congruential Generator" (https://en.wikipedia.org/wiki/Linear_congruential_generator) as a pseudo-random number generator using gcc's default coefficients (modulus=2^31, a=1103515245, c=12345, starting with a seed=1) and combined with the modern "Fisher Yates shuffle algorithm"  https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm to generate a random list of the pixels to be sent. See reference code for details. This will allow all receivers and the transmitter to generate identical lists of order that pixels will be transmitted. Since every packet has the same number of pixels, the packet ID will give the receiver the starting pixel number from which the list of pixels received in the packet can be extracted.
@@ -70,7 +73,7 @@ If transmitting over channels the require/prefer printable ascii text, the binar
    1. Convert those 6 bits to one ASCII byte using bits+33
 
 ### AX.25 and APRS compatible packets
-PCSI can be used in AX.25 APRS compatible packets (even if not sent over the APRS network) by the following:
+PCSI can be sent as the information field in simple AX.25 UI packets as described above. Additionally, with a few modifications, PCSI may be sent as AX.25 APRS compatible packets by the following:
 * The AX.25 Destination Address is set to PCSI with an SSID chosen by user. This indicates a PCSI altnet intended for anyone interested in PCSI to see. *IS THIS CORRECT? SHOULD IT BE APZXXX INSTEAD?*
 * The information field of the AX.25 packet has the following format
   * 3 Bytes: `{{V`

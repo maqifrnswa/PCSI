@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
+# Author: Scott Howard KD9PDP
+# License: GPL-3.0
 # Adapted from
 # http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/
 
 import os
 import numpy as np
+import argparse
 from pylbfgs import owlqn
 import imageio
 import scipy.fftpack as spfft
-# import matplotlib.pyplot as plt
-# from base91 import rgb2ycbcr, ycbcr2rgb, numPixelsSent  # rename this module
 from pcsi.colorconv import rgb2ycbcr, ycbcr2rgb, numPixelsSent
-import argparse
+
 
 def dct2(x):
     """Return 2D discrete cosine transform.
@@ -64,39 +65,29 @@ parser = argparse.ArgumentParser(description="Command line tool to simulate PCSI
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--imagefile", type=str, default='HAB2sstv.bmp',
                     help="Input image to transmit (24bit color, any filetype)")
-#parser.add_argument("imagefile", type=str,
-#                    help="Input image to transmit (24bit color, any filetype)")
-
-parser.add_argument("-b", "--bitdepth", type=int, default=24,
+parser.add_argument("-b", "--bitdepth", type=int, default=12,
                     help="Bit depth transmit (e.g., 24 for 24-bit color)")
-parser.add_argument("-N", "--numpackets", type=int, nargs='*', default=100,
+parser.add_argument("-N", "--numpackets", type=int, nargs='*', default=[150],
                     help="Number of packets to simulate")
-parser.add_argument("-c", "--chromacomp", type=int, default=1, nargs='*',
+parser.add_argument("-c", "--chromacomp", type=int, default=[20], nargs='*',
                     help="Chroma Compression ratio")
 parser.add_argument("-a", "--bitsAvailable", type=int, default=1992,
                     help="Number of bits available in payload for image data")
 parser.add_argument("-o", "--outfolder", type=str, default="results",
                     help="Output folder name")
-
-
 args = parser.parse_args()
+
 print(args.chromacomp)
 # Normally we assume 24 bit color. Can simulate what happens if we transmit
 # lower color depth.
 transmittedColorDepth = args.bitdepth # MULTIPLE OF 3!!
-bitDepthToRemove = (24-transmittedColorDepth)/3  # per channel
+bitDepthToRemove = int((24-transmittedColorDepth)/3)  # per channel
 
-numberPackets = args.numpackets
-#numberPackets = (100, ) #, 300, 1000)
-chromaCompressionList= args.chromacomp
-#chromaCompressionList = (16,)  # chromaCompression is the total number of pix/ YCbCr pix
-# sampleSizes are the number of YCbCr and Y only pixels received in n packets
-
-
+numberPackets = args.numpackets  # list of the number of packets sent
+# is the list of chromaCompression is the total number of pix/ YCbCr pix
+chromaCompressionList = args.chromacomp
 
 # read original image
-# Xorig = imageio.imread('escher_waterfall.jpeg')
-# Xorig = imageio.imread('HAB.jpg')
 Xorig = imageio.imread(args.imagefile)
 
 imagefileName, ext = args.imagefile.split('.')
@@ -109,9 +100,11 @@ if not os.path.exists(args.outfolder):
 Xorig = rgb2ycbcr(Xorig)
 ny,nx,nchan = Xorig.shape
 
-
-
 for chromaCompression in chromaCompressionList:
+    # sampleSizes are the number of YCbCr and Y only pixels received in n packets
+    print(numberPackets,
+                                 transmittedColorDepth,
+                                 chromaCompression, args.bitsAvailable)
     sampleSizes = [numPixelsSent(n,
                                  transmittedColorDepth,
                                  chromaCompression,
@@ -125,7 +118,7 @@ for chromaCompression in chromaCompressionList:
         # create random sampling index vector
         k = sum(s)
         if(k > nx * ny):
-            continue  # too good of an image
+            continue  # requested more pixels than in image
         ritotal = np.random.choice(nx * ny, k, replace=False) # random sample of indices
 
         # for each color channel
@@ -139,10 +132,11 @@ for chromaCompression in chromaCompressionList:
             # extract channel
             X = Xorig[:,:,j].squeeze()
 
-            # simulate color depth transmitted
+            # simulate color depth transmitted - figure out better sim?
             X = np.around(X / 2.**bitDepthToRemove) * 2.**bitDepthToRemove
             X[X>255] = 255
-
+            # X = (X>>bitDepthToRemove)<<bitDepthToRemove
+            # X = np.around(X / ((2**8)-1) * ((2**(transmittedColorDepth/3))-1))
 
             # create images of mask (for visualization)
             Xm = 255 * np.ones(X.shape)
@@ -166,35 +160,3 @@ for chromaCompression in chromaCompressionList:
                         + str(transmittedColorDepth) + 'b_'
                         + str(chromaCompression) +'.bmp', Z[i])
 
-
-#Xorig = ycbcr2rgb(Xorig)
-
-
-
-#f, ax = plt.subplots(2, 3)#, figsize=(14, 4))
-#
-#ax[0,0].imshow(Xorig, interpolation='none')
-#ax[0,0].axis('off')
-##ax[0,0].title.set_text('Orig Image 2h45m')
-#ax[0,0].title.set_text('Orig Image 167 mins \n 1000 packets')
-#ax[0,1].imshow(Z[0], interpolation='none')
-#ax[0,1].axis('off')
-##ax[0,1].title.set_text('0h16m')
-#ax[0,1].title.set_text('8 mins \n 48 packets')
-##ax[0,2].imshow(Z[1], interpolation='none')
-##ax[0,2].axis('off')
-###ax[0,2].title.set_text('0h33m')
-##ax[0,2].title.set_text('16 mins \n 96 packets')
-##ax[1,0].imshow(Z[2], interpolation='none')
-##ax[1,0].axis('off')
-###ax[1,0].title.set_text('0h49m')
-##ax[1,0].title.set_text('24 mins \n 144 packets')
-##ax[1,1].imshow(Z[3], interpolation='none')
-##ax[1,1].axis('off')
-###ax[1,1].title.set_text('1h06m')
-##ax[1,1].title.set_text('32 mins \n 192 packets')
-##ax[1,2].imshow(Z[4], interpolation='none')
-##ax[1,2].axis('off')
-###ax[1,1].title.set_text('1h22m')
-##ax[1,2].title.set_text('40 mins \n 240 packets')
-#plt.show()
