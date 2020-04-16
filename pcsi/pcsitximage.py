@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 16 15:39:50 2020
+
+@author: showard
+"""
+
+import imageio
+# import math  # used for log functions
+# from bitstring import BitStream  # maybe use "Bits" instead of "BitStream"?
+import bitstring
+from pcsi.base91 import base91tobytes, bytestoBase91, isBase91
+from pcsi.colorconv import rgb2ycbcr, ycbcr2rgb, numPixelsSent
+from pcsi.prandom import shufflePixels
+
+
+class PCSItxImage:
+    def __init__(self,
+                 filename,
+                 imageID,
+                 packetNum,
+                 bitDepth,
+                 chromaCompression,
+                 infoBytes=256,
+                 APRSprefixBytes=False,
+                 base91=False):
+        # do an inventory, do I need all the variables to be members?
+        self.imageID = imageID
+        self.bitDepth = bitDepth
+        self.chromaCompression = chromaCompression
+        self.base91 = base91
+
+        if(APRSprefixBytes):
+            self.prefixBytes = b"{{V"
+        else:
+            self.prefixBytes = b""
+        infoBytes = infoBytes - len(self.prefixBytes)
+        if base91:
+            # if done 13 bits at a time, worst case for base91
+            self.totalPayloadBits = 13 * int(infoBytes / 2)
+        else:
+            self.totalPayloadBits = infoBytes*8
+        payloadImageBits = self.totalPayloadBits - 8*7  # 7 info header bytes
+        Xorig = imageio.imread(filename)
+        self.XYCbCr = rgb2ycbcr(Xorig)
+        self.ny, self.nx, self.nchan = Xorig.shape
+        self.numYCbCr, self.numY = numPixelsSent(1,
+                                                 bitDepth,
+                                                 chromaCompression,
+                                                 payloadImageBits)
+        self.pixelList = shufflePixels(self.ny, self.nx)
+
+    def genPayload(self, packetNum):
+        header = bitstring.pack(
+                'uint:8, uint:8, uint:8, uint:16, uint:8, uint:8',
+                self.imageID,
+                int(self.ny/16),
+                int(self.nx/16),
+                packetNum,
+                self.numYCbCr,
+                int(self.bitDepth/3-1))
+        startingPixel = packetNum * (self.numYCbCr + self.numY)
+
+        # Ytosend = np.zeros(numYCbCr+numY)
+        # Yextratosend = XYCbCr[:,:,0].flat[pixelList[numYCbCr:numY]]
+
+        # YCbCr2send = [XYCbCr[:,:,c].flat[pixelList[:numYCbCr]] for c in range(3)]
+        # YCbCr2send = np.array(YCbCr2send).T
+
+        dataToSend = header
+        for pixelNum in self.pixelList[startingPixel:startingPixel+self.numYCbCr]:
+            packString = 'uint:' + str(int(self.bitDepth/3)) + ', uint:' + str(int(self.bitDepth/3)) + ', uint:'+ str(int(self.bitDepth/3))
+            Y = int(self.XYCbCr[:,:,0].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            Cb = int(self.XYCbCr[:,:,2].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            # Cr = int.to_bytes(int(XYCbCr[:,:,2].flat[pixelNum]),1,"big")
+            Cr = int(self.XYCbCr[:,:,2].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            dataToSend = dataToSend + bitstring.pack(packString, Y, Cb, Cr)
+        for pixelNum in self.pixelList[startingPixel+self.numYCbCr:startingPixel+self.numYCbCr+self.numY]:
+            Y = int(self.XYCbCr[:,:,0].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            dataToSend = dataToSend + bitstring.pack('uint:' + str(int(self.bitDepth/3)), Y)
+        if self.base91:
+            # dataToSend = megaBase91(int.from_bytes(dataToSend,"big"))
+            dataToSend = bytestoBase91(dataToSend)
+        else:
+            dataToSend = dataToSend.tobytes()  # zero pads data so that it fits and makes it bytes for serial port
+        return self.prefixBytes + dataToSend  # for APRS, return b'{{v'+ dataToSend # and need to change how many bits are in the info
