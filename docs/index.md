@@ -61,6 +61,8 @@ Given a bitmapped image to transfer, follow the following proceedures
 #### Pseudo-random Number Generation for Picking Pixels
 Compressed sensing imaging requires that the measurements are uncorellated in the sparse domain that is used to reconstruct the image. Taking random samples ensures this condition, however, both the transmitter and receiver need to know which pixel values correspond to which pixels in the image. To do this, PCSI uses a "Linear Congruential Generator" (https://en.wikipedia.org/wiki/Linear_congruential_generator) as a pseudo-random number generator using gcc's default coefficients (modulus=2^31, a=1103515245, c=12345, starting with a seed=1) and combined with the modern "Fisher Yates shuffle algorithm"  https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm to generate a random list of the pixels to be sent. See reference code for details. This will allow all receivers and the transmitter to generate identical lists of order that pixels will be transmitted. Since every packet has the same number of pixels, the packet ID will give the receiver the starting pixel number from which the list of pixels received in the packet can be extracted.
 
+Pixels are indexed column-first, not row first as is typically done in Python. You therefore have to transpose a matrix before selecting and assigning pixels.
+
 #### PCSI Payload base91 Encoding
 If transmitting over channels the require/prefer printable ascii text, the binary stream can be converted to base91 in the following way. This is combination of APRS base91 and basE91 (http://base91.sourceforge.net/). Compared to basE91, this is simpler and deterministic at the cost of slightly more overhead
 1. While there are 13 bits or more to convert, read in 13 bits
@@ -76,8 +78,8 @@ If transmitting over channels the require/prefer printable ascii text, the binar
 PCSI can be sent as the information field in simple AX.25 UI packets as described above. Additionally, with a few modifications, PCSI may be sent as AX.25 APRS compatible packets by the following:
 * The AX.25 Destination Address is set to PCSI with an SSID chosen by user. This indicates a PCSI altnet intended for anyone interested in PCSI to see. *IS THIS CORRECT? SHOULD IT BE APZXXX INSTEAD?*
 * The information field of the AX.25 packet has the following format
-  * 3 Bytes: `{{V`
-    * Per the APRS spec, {{ indicates an experimental user-defined packet, and V is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
+  * 3 Bytes: `{% raw %}{{V{% endraw %}`
+    * Per the APRS spec, `{% raw %}{{V{% endraw %}` indicates an experimental user-defined packet, and V is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
   * The total number of bytes in the information field will be less than or equal to 256 bytes.
 
 ## Reconstructing PCSI Images
