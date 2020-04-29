@@ -137,7 +137,7 @@ try:
                           ['WIDE1-1', 'WIDE2-1'])
         test.setPersistence(.65)
         test.setSlotTime(100)
-        test.send(5, 30)
+        test.send(1, 30)
         print(ser.read(1000))
         # test.setPersistence(.3)
 except serial.SerialException:
