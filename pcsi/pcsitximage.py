@@ -69,15 +69,17 @@ class PCSItxImage:
         # YCbCr2send = np.array(YCbCr2send).T
 
         dataToSend = header
+        # pixels are numbered by columns first in PCSI
+        # which is consistent with C but not with python, so we transpose first
         for pixelNum in self.pixelList[startingPixel:startingPixel+self.numYCbCr]:
             packString = 'uint:' + str(int(self.bitDepth/3)) + ', uint:' + str(int(self.bitDepth/3)) + ', uint:'+ str(int(self.bitDepth/3))
-            Y = int(self.XYCbCr[:,:,0].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
-            Cb = int(self.XYCbCr[:,:,2].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            Y = round(self.XYCbCr[:,:,0].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            Cb = round(self.XYCbCr[:,:,2].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
             # Cr = int.to_bytes(int(XYCbCr[:,:,2].flat[pixelNum]),1,"big")
-            Cr = int(self.XYCbCr[:,:,2].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            Cr = round(self.XYCbCr[:,:,2].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
             dataToSend = dataToSend + bitstring.pack(packString, Y, Cb, Cr)
         for pixelNum in self.pixelList[startingPixel+self.numYCbCr:startingPixel+self.numYCbCr+self.numY]:
-            Y = int(self.XYCbCr[:,:,0].flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            Y = round(self.XYCbCr[:,:,0].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
             dataToSend = dataToSend + bitstring.pack('uint:' + str(int(self.bitDepth/3)), Y)
         if self.base91:
             # dataToSend = megaBase91(int.from_bytes(dataToSend,"big"))

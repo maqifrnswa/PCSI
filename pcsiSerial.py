@@ -12,10 +12,12 @@ import re
 import numpy as np
 # import math  # used for log functions
 from bitstring import BitStream  # maybe use "Bits" instead of "BitStream"?
+import imageio
 import serial
 from pcsi.prandom import shufflePixels
 from pcsi.pcsitximage import PCSItxImage
 from pcsi.pcsikisstx import PCSIkissTX
+from pcsi.base91 import isBase91, base91tobytes
 
 
 def parseTNC(packet):
@@ -52,9 +54,10 @@ def unax25ifyAddresses(packet):
 
 class PCISDecoder():
     def __init__(self):
-        self.Z = None
+        self.Z = np.zeros([2,2], dtype='uint8')
         self.serialBuffer = b''
-        self.pixels =[]  # we might need to do Z.T.flat[pixels], because the decode uses transpose
+        self.pixelsY = []
+        self.pixelsCbCr = []
         # self.uninit=1
     def processSerial(self, rawSerial):
         """
@@ -66,6 +69,7 @@ class PCISDecoder():
         """
         rawSerial = BitStream(self.serialBuffer+rawSerial)
         raw = [s for s in rawSerial.split('0xc0', bytealigned = True)]
+        print(raw)
         for packet in raw[:-1]:
             if len(packet) > 16:
                 unkissPacket = unkissifyPacket(packet)
@@ -103,17 +107,32 @@ class PCISDecoder():
                 pixelID = pixelList[startingPixel:startingPixel+len(pixelYData)]
 
                 # temporarily display and hold image data
-                if len(self.pixels) == 0:
+                # pixels are counted down a column first, so we transpose image
+                # this conversion is "wrong," need to do it as floats
+
+                #print(pixelID)
+                #print(pixelYData)
+                pixelYData = np.array(pixelYData) / (2**(channelBD)-1) * (2**8-1)
+                pixelYData[pixelYData>255]=255
+
+                pixelCbData = np.array(pixelCbData) / (2**(channelBD)-1) * (2**8-1)
+                pixelCbData[pixelCbData>255]=255
+
+                pixelCrData = np.array(pixelCrData) / (2**(channelBD)-1) * (2**8-1)
+                pixelCrData[pixelCrData>255]=255
+
+                if len(self.pixelsY) == 0:
                     self.Z = np.zeros((ny,nx,3), dtype='uint8')
-                self.Z[:,:,0].flat[pixelID] = pixelYData
-                self.Z[:,:,0].flat[pixelID] <<= (8-channelBD)
-                self.Z[:,:,1].flat[pixelID[:len(pixelCbData)]] = pixelCbData
-                self.Z[:,:,1].flat[pixelID] <<= (8-channelBD)
-                self.Z[:,:,2].flat[pixelID[:len(pixelCrData)]] = pixelCrData
-                self.Z[:,:,2].flat[pixelID] <<= (8-channelBD)
+                self.Z[:,:,0].T.flat[pixelID] = np.around(pixelYData)
+                # self.Z[:,:,0].T.flat[pixelID] <<= (8-channelBD)
+                self.Z[:,:,1].T.flat[pixelID[:len(pixelCbData)]] = np.around(pixelCbData)
+                # self.Z[:,:,1].T.flat[pixelID] <<= (8-channelBD)
+                self.Z[:,:,2].T.flat[pixelID[:len(pixelCrData)]] = np.around(pixelCrData)
+                # self.Z[:,:,2].T.flat[pixelID] <<= (8-channelBD)
                 # self.Z = self.Z << (8-channelBD)  # (Z >> (8-channelBD) ) << (8-channelBD) # /(2**channelBD-1)*255
                 # self.Z = ycbcr2rgb(self.Z.astype(float))
-                self.pixels.extend(pixelID)
+                self.pixelsY.extend(pixelID)
+                self.pixelsCbCr.extend(pixelID[:len(pixelCrData)])
                 self.serialBuffer = raw[-1].tobytes()
 
 
@@ -124,26 +143,44 @@ txImage = PCSItxImage(filename="HAB2sstv.bmp",
                       chromaCompression=16,
                       infoBytes=256,
                       APRSprefixBytes=True,  # if we change this, we have to change the decode too
-                      base91=True)
+                      base91=False)
 
 
+serialport='/tmp/kisstnc'
+#serialport='/dev/ttyUSB0'
+# transmit
 try:
-    with serial.Serial(port='/tmp/kisstnc', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+    with serial.Serial(port=serialport, bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
     # with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
         test = PCSIkissTX(txImage,
                           ser,
                           'KD9PDP-0',
-                          'KD9PDP-1',
+                          'PCSI-0',
                           ['WIDE1-1', 'WIDE2-1'])
-        test.setPersistence(.65)
-        test.setSlotTime(100)
-        test.send(1, 30)
-        print(ser.read(1000))
+       # test.setPersistence(.65)
+        #test.setSlotTime(100)
+        test.send(3, 30)
+        # print(ser.read(1000))
         # test.setPersistence(.3)
 except serial.SerialException:
+    print('failed to connect to serial port to tx')
     pass
 
-
+# receive
+decoder = PCISDecoder()
+try:
+    with serial.Serial(port=serialport, bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+    # with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+        while len(decoder.pixelsY) < 1:  # some threshold for how long to sit for
+            print('checking for packet')
+            newdata = ser.read(1000)
+            print(newdata)
+            decoder.processSerial(newdata)
+            imageio.imwrite('testing.bmp', decoder.Z)
+        # test.setPersistence(.3)
+except serial.SerialException:
+    print('failed to connect to serial port to rx')
+    pass
 
 #  this stuff for testing:
 #dataToSend = txImage.genPayload(0)
