@@ -19,7 +19,6 @@ class PCSItxImage:
     def __init__(self,
                  filename,
                  imageID,
-                 packetNum,
                  bitDepth,
                  chromaCompression,
                  infoBytes=256,

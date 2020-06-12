@@ -11,6 +11,12 @@ from tkinter import ttk, filedialog
 import os
 import serial.tools.list_ports
 from PIL import ImageTk, Image
+import imageio
+from pcsi.colorconv import numPixelsSent
+from pcsi.pcsitximage import PCSItxImage
+from pcsi.pcsikisstx import PCSIkissTX
+from pcsi.pcsidecoder import PCSIDecoder
+
 
 
 root = Tk()
@@ -48,9 +54,9 @@ ttk.Checkbutton(packetconfigframe, text="APRS info prefix", variable=aprsPrefix)
 usebase91 = StringVar()
 ttk.Checkbutton(packetconfigframe, text="Base91 Encode", variable=usebase91).grid(column=0,row=1,stick=(N,W,E))
 ttk.Label(packetconfigframe, text="Packet Info Bytes").grid(column=0, row=2, sticky=(N, W, E))
-infoBytes = StringVar()
-infoBytes.set("256")
-ttk.Entry(packetconfigframe, textvariable=infoBytes, width=8).grid(column=0,row=3, sticky=(N,W,E))
+infoBytesVar = StringVar()
+infoBytesVar.set(256)
+ttk.Entry(packetconfigframe, textvariable=infoBytesVar, width=8).grid(column=0,row=3, sticky=(N,W,E))
 
 
 serialframe = ttk.Labelframe(mainframe,text="Serial Config",padding=defaultPadding)
@@ -106,14 +112,12 @@ imagedataFrame.grid(column=2,row=0,sticky=(N, W, E, S))
 imagedataFrame.columnconfigure(0, weight=1)
 imagedataFrame.rowconfigure(0, weight=1)
 imagefilename = StringVar()
-ttk.Label(imagedataFrame, textvariable=imagefilename).grid(column=0, row=0, sticky=(N, W))
+ttk.Label(imagedataFrame, textvariable=imagefilename, wraplength=200).grid(column=0, row=0, sticky=(N, W))
 dimVar = StringVar()
 ttk.Label(imagedataFrame, textvariable=dimVar).grid(column=0, row=1, sticky=(N, W))
 
-txinfoFrame = ttk.Labelframe(mainframe, text="Image tx info Data",padding=defaultPadding)
-txinfoFrame.grid(column=2,row=1,sticky=(N, W, E, S))
-txinfoFrame.columnconfigure(0, weight=1)
-txinfoFrame.rowconfigure(0, weight=1)
+txinfoFrame = ttk.Labelframe(mainframe, text="Image TX Settings",padding=defaultPadding)
+txinfoFrame.grid(column=2,row=1,rowspan=2,sticky=(N, W, E, S))
 ttk.Label(txinfoFrame, text="TX Bit Depth:").grid(column=0, row=0, sticky=(N, W, E))
 bitdepthVar = StringVar()
 bitdepthVar.set("12")
@@ -122,5 +126,79 @@ ccVar = StringVar()
 ccVar.set("20")
 ttk.Label(txinfoFrame, text="TX Chroma Compression:").grid(column=0, row=2, sticky=(N, W, E))
 ttk.Entry(txinfoFrame, textvariable=ccVar, width=8).grid(column=0,row=3, sticky=(N,W,E))
+
+ttk.Label(txinfoFrame, text="Number of Packets:").grid(column=0, row=4, sticky=(N, W, E))
+numpacketVar = StringVar()
+numpacketVar.set(2)
+ttk.Entry(txinfoFrame, textvariable=numpacketVar).grid(column=0, row=5, sticky=(N, W, E))
+
+ttk.Label(txinfoFrame, text="Image ID number:").grid(column=0, row=6, sticky=(N, W, E))
+imageidVar = StringVar()
+imageidVar.set(0)
+ttk.Entry(txinfoFrame, textvariable=imageidVar).grid(column=0, row=7, sticky=(N, W, E))
+
+def simulateTX(*args):
+    pass
+    #numpix = numPixelsSent(1, bitdepthVar.get(), ccVar.get(), infoBytes.get())
+ttk.Button(txinfoFrame, text="Simulate", command=simulateTX).grid(column=0, row=8, sticky=(N, W, E))
+
+ttk.Label(txinfoFrame, text="Max Packets/Min:").grid(column=0, row=9, sticky=(N, W, E))
+packetrateVar = StringVar()
+packetrateVar.set(60)
+ttk.Entry(txinfoFrame, textvariable=packetrateVar).grid(column=0, row=10, sticky=(N, W, E))
+def transmitPCSI(*args):
+    txImage = PCSItxImage(filename=imagefilename.get(),
+                      imageID=int(imageidVar.get()),
+                      bitDepth=int(bitdepthVar.get()),
+                      chromaCompression=int(ccVar.get()),
+                      infoBytes=int(infoBytesVar.get()),
+                      APRSprefixBytes=bool(aprsPrefix.get()),  # if we change this, we have to change the decode too
+                      base91=bool(usebase91.get()))
+    try:
+        with serial.Serial(port=portsbox.get(portsbox.curselection()), bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+        # with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+            test = PCSIkissTX(txImage,
+                              ser,
+                              callSign.get(),
+                              destNet.get(),
+                              [])
+            # test.setPersistence(.65)
+            #test.setSlotTime(100)
+            test.send(int(numpacketVar.get()), int(packetrateVar.get()))
+    except serial.SerialException:
+        print('failed to connect to serial port')
+        pass
+
+ttk.Button(txinfoFrame, text="TRANSMIT", command=transmitPCSI).grid(column=0, row=11, sticky=(N, W, E))
+
+rxFrame = ttk.Labelframe(mainframe, text="RX Control",padding=defaultPadding)
+rxFrame.grid(column=3,row=0,rowspan=3,sticky=(N, W, E, S))
+rxFrame.columnconfigure(0, weight=1)
+rxFrame.rowconfigure(0, weight=1)
+
+def receivePCSI(*args):
+    #probably will have to use the tk.after command to run this periodically
+    decoder = PCSIDecoder()
+    try:
+        with serial.Serial(port=portsbox.get(portsbox.curselection()), bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+        # with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+            print('checking for packet')
+            newdata = ser.read(1000)
+            print(newdata)
+            if newdata:
+                decoder.processSerial(newdata)
+                for key in decoder.Z:
+                    if not os.path.exists(key):
+                        os.makedirs(key)
+                    imageio.imwrite(key+'/raw.bmp', decoder.Z[key])
+                    with open(key+'/pixelsY.npy', 'wb') as f:
+                        np.save(f,decoder.pixelsY[key])
+                        np.save(f,decoder.pixelsCbCr[key])
+    except serial.SerialException:
+        print('failed to connect to serial port')
+        pass
+
+ttk.Button(rxFrame, text = "RECEIVE", command = receivePCSI).grid(column=0, row=0, sticky=(N, W, E))
+
 
 root.mainloop()

@@ -19,9 +19,10 @@ class PCSIkissTX:
                  ser,
                  source,
                  destination,
-                 digipeaters):
+                 digipeaters=[]):
         '''
-        source, destination, digipeaters as KD9PDP-0 etc.
+        source, destination, digipeaters as KD9PDP-0 or KD9PDP.
+        Digipeaters optional
         ser is a serial object. Use it with a context manager in the main code
         maxPacketRate: maximum number of packets per second transmitted
         '''
