@@ -9,6 +9,7 @@ Created on Thu Jun 11 11:36:30 2020
 from tkinter import *
 from tkinter import ttk, filedialog
 import os
+import json
 import serial.tools.list_ports
 from PIL import ImageTk, Image
 import imageio
@@ -31,8 +32,8 @@ root.rowconfigure(0, weight=1)
 
 callframe = ttk.Labelframe(mainframe,text="Identification",padding=defaultPadding)
 callframe.grid(column=0, row=0, sticky=(N, W, E, S))
-callframe.columnconfigure(0, weight=1)
-callframe.rowconfigure(0, weight=1)
+#callframe.columnconfigure(0, weight=1)
+#callframe.rowconfigure(0, weight=1)
 
 ttk.Label(callframe, text="Callsign:").grid(column=0, row=0, sticky=(N, W, E))
 callSign = StringVar()
@@ -46,8 +47,8 @@ ttk.Entry(callframe, textvariable=destNet, width=8).grid(column=0,row=4, sticky=
 
 packetconfigframe = ttk.Labelframe(mainframe,text="Packet Configuration",padding=defaultPadding)
 packetconfigframe.grid(column=0, row=1, sticky=(N, W, E, S))
-packetconfigframe.columnconfigure(0, weight=1)
-packetconfigframe.rowconfigure(0, weight=1)
+#packetconfigframe.columnconfigure(0, weight=1)
+#packetconfigframe.rowconfigure(0, weight=1)
 
 aprsPrefix = StringVar()
 ttk.Checkbutton(packetconfigframe, text="APRS info prefix", variable=aprsPrefix).grid(column=0,row=0,stick=(N,W,E))
@@ -61,8 +62,8 @@ ttk.Entry(packetconfigframe, textvariable=infoBytesVar, width=8).grid(column=0,r
 
 serialframe = ttk.Labelframe(mainframe,text="Serial Config",padding=defaultPadding)
 serialframe.grid(column=0, row=2, sticky=(N, W, E, S))
-serialframe.columnconfigure(0, weight=1)
-serialframe.rowconfigure(0, weight=1)
+#serialframe.columnconfigure(0, weight=1)
+#serialframe.rowconfigure(0, weight=1)
 
 portsVar = StringVar()
 
@@ -79,6 +80,22 @@ s = ttk.Scrollbar(serialframe, orient=VERTICAL, command=portsbox.yview)
 s.grid(column=1, row=0, sticky=(N,S))
 portsbox.configure(yscrollcommand = s.set)
 ttk.Button(serialframe,text="Rescan Ports",command=scanPorts).grid(column=0, row=1,columnspan=2,sticky=(N,W,E))
+
+ser = serial.Serial(port=None, bytesize=8, parity='N', stopbits = 1, timeout = 0)
+def connectPort(*args):
+    try:
+        ser.port = portsbox.get(portsbox.curselection())
+        ser.open()
+        connectedVar.set("Connected: " + portsbox.get(portsbox.curselection()))# with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+    except serial.SerialException:
+        connectedVar.set("Failed to connect")# with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
+        pass
+
+ttk.Button(serialframe,text="Connect",command=connectPort).grid(column=0, row=2,columnspan=2,sticky=(N,W,E))
+connectedVar = StringVar()
+connectedVar.set("Not connected")
+ttk.Label(serialframe,textvar=connectedVar).grid(column=0, row=3,columnspan=2,sticky=(N,W,E))
+
 
 def loadfile(*args):
     filename = filedialog.askopenfilename()
@@ -99,8 +116,8 @@ ttk.Button(mainframe,text="Load Image",command=loadfile).grid(column=1, row=3, s
 
 imageFrame = ttk.Labelframe(mainframe, text="Image preview",padding=defaultPadding)
 imageFrame.grid(column=1,row=0, rowspan=3,sticky=(N, W, E, S))
-imageFrame.columnconfigure(0, weight=1)
-imageFrame.rowconfigure(0, weight=1)
+#imageFrame.columnconfigure(0, weight=1)
+#imageFrame.rowconfigure(0, weight=1)
 imageCanvas = Canvas(imageFrame, width=320, height=240)
 imageCanvas.grid(column=1,row=0, rowspan=3,sticky=(N, W))
 testing=ImageTk.PhotoImage(Image.open("/home/showard/compressedsensing/PCSI/HAB2sstv.bmp"))
@@ -109,8 +126,8 @@ testing=ImageTk.PhotoImage(Image.open("/home/showard/compressedsensing/PCSI/HAB2
 
 imagedataFrame = ttk.Labelframe(mainframe, text="Image Data",padding=defaultPadding)
 imagedataFrame.grid(column=2,row=0,sticky=(N, W, E, S))
-imagedataFrame.columnconfigure(0, weight=1)
-imagedataFrame.rowconfigure(0, weight=1)
+#imagedataFrame.columnconfigure(0, weight=1)
+#imagedataFrame.rowconfigure(0, weight=1)
 imagefilename = StringVar()
 ttk.Label(imagedataFrame, textvariable=imagefilename, wraplength=200).grid(column=0, row=0, sticky=(N, W))
 dimVar = StringVar()
@@ -129,7 +146,7 @@ ttk.Entry(txinfoFrame, textvariable=ccVar, width=8).grid(column=0,row=3, sticky=
 
 ttk.Label(txinfoFrame, text="Number of Packets:").grid(column=0, row=4, sticky=(N, W, E))
 numpacketVar = StringVar()
-numpacketVar.set(2)
+numpacketVar.set("CURRENTLY NOT USED")
 ttk.Entry(txinfoFrame, textvariable=numpacketVar).grid(column=0, row=5, sticky=(N, W, E))
 
 ttk.Label(txinfoFrame, text="Image ID number:").grid(column=0, row=6, sticky=(N, W, E))
@@ -144,9 +161,13 @@ ttk.Button(txinfoFrame, text="Simulate", command=simulateTX).grid(column=0, row=
 
 ttk.Label(txinfoFrame, text="Max Packets/Min:").grid(column=0, row=9, sticky=(N, W, E))
 packetrateVar = StringVar()
-packetrateVar.set(60)
+packetrateVar.set(30)
 ttk.Entry(txinfoFrame, textvariable=packetrateVar).grid(column=0, row=10, sticky=(N, W, E))
+transmitting = False
 def transmitPCSI(*args):
+    if callSign.get() == "NOCALL":
+        print("Callsign must be set")
+        return
     txImage = PCSItxImage(filename=imagefilename.get(),
                       imageID=int(imageidVar.get()),
                       bitDepth=int(bitdepthVar.get()),
@@ -154,51 +175,96 @@ def transmitPCSI(*args):
                       infoBytes=int(infoBytesVar.get()),
                       APRSprefixBytes=bool(aprsPrefix.get()),  # if we change this, we have to change the decode too
                       base91=bool(usebase91.get()))
-    try:
-        with serial.Serial(port=portsbox.get(portsbox.curselection()), bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
-        # with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
-            test = PCSIkissTX(txImage,
-                              ser,
-                              callSign.get(),
-                              destNet.get(),
-                              [])
-            # test.setPersistence(.65)
-            #test.setSlotTime(100)
-            test.send(int(numpacketVar.get()), int(packetrateVar.get()))
-    except serial.SerialException:
-        print('failed to connect to serial port')
-        pass
+    kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), [])
+    kissTX.send(int(numpacketVar.get()), int(packetrateVar.get()))
 
-ttk.Button(txinfoFrame, text="TRANSMIT", command=transmitPCSI).grid(column=0, row=11, sticky=(N, W, E))
+def transmitStart(*args):
+    global transmitting
+    global kissTX
+    transmitting = True
+    txImage = PCSItxImage(filename=imagefilename.get(),
+                          imageID=int(imageidVar.get()),
+                          bitDepth=int(bitdepthVar.get()),
+                          chromaCompression=int(ccVar.get()),
+                          infoBytes=int(infoBytesVar.get()),
+                          APRSprefixBytes=bool(aprsPrefix.get()),  # if we change this, we have to change the decode too
+                          base91=bool(usebase91.get()))
+    kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), [])
+    transmitStatus.set("TX Status: Running")
+
+def transmitStop(*args):
+    global transmitting
+    transmitting = False
+    transmitStatus.set("TX Status: Stopped")
+
+ttk.Button(txinfoFrame, text="TX Start", command=transmitStart).grid(column=0, row=11, sticky=(N, W, E))
+ttk.Button(txinfoFrame, text="TX Pause", command=transmitStop).grid(column=0, row=12, sticky=(N, W, E))
+transmitStatus=StringVar()
+ttk.Label(txinfoFrame, textvariable=transmitStatus).grid(column=0, row=13, sticky=(N, W, E))
 
 rxFrame = ttk.Labelframe(mainframe, text="RX Control",padding=defaultPadding)
 rxFrame.grid(column=3,row=0,rowspan=3,sticky=(N, W, E, S))
-rxFrame.columnconfigure(0, weight=1)
-rxFrame.rowconfigure(0, weight=1)
-
-def receivePCSI(*args):
-    #probably will have to use the tk.after command to run this periodically
-    decoder = PCSIDecoder()
-    try:
-        with serial.Serial(port=portsbox.get(portsbox.curselection()), bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
-        # with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
-            print('checking for packet')
-            newdata = ser.read(1000)
-            print(newdata)
-            if newdata:
-                decoder.processSerial(newdata)
-                for key in decoder.Z:
-                    if not os.path.exists(key):
-                        os.makedirs(key)
-                    imageio.imwrite(key+'/raw.bmp', decoder.Z[key])
-                    with open(key+'/pixelsY.npy', 'wb') as f:
-                        np.save(f,decoder.pixelsY[key])
-                        np.save(f,decoder.pixelsCbCr[key])
-    except serial.SerialException:
-        print('failed to connect to serial port')
-        pass
-
-ttk.Button(rxFrame, text = "RECEIVE", command = receivePCSI).grid(column=0, row=0, sticky=(N, W, E))
+#rxFrame.columnconfigure(0, weight=1)
+#rxFrame.rowconfigure(0, weight=1)
 
 
+def receiveStart(*args):
+    global receiving
+    receiving = True
+    receiveStatus.set("RX Status: Running")
+    pass
+
+def receiveStop(*args):
+    global receiving
+    receiving = False
+    receiveStatus.set("RX Status: Stopped")
+    pass
+
+decoder = PCSIDecoder()
+receiving = False
+ttk.Button(rxFrame, text = "RX Start", command = receiveStart).grid(column=0, row=0, sticky=N)
+ttk.Button(rxFrame, text = "RX Stop", command = receiveStop).grid(column=0, row=1, sticky=N)
+receiveStatus = StringVar()
+receiveStatus.set("RX Status: Stopped")
+ttk.Label(rxFrame, textvariable=receiveStatus).grid(column=0, row=2, sticky=N)
+receivedImgs = StringVar()
+receivedList = Listbox(rxFrame, listvariable=receivedImgs, height=5)
+receivedList.grid(column=0, row=3,sticky=(N,W,E))
+
+def processControls(*args):
+    if transmitting & (callSign.get() == "NOCALL"):
+            print("Callsign must be set")
+            transmitStop()
+    elif transmitting:
+        global kissTX
+        kissTX.sendPacket(kissTX.currentPacket)
+        kissTX.currentPacket += 1
+    if receiving:
+        print('checking for packet')
+        newdata = ser.read(2000)
+        print(newdata)
+        if newdata:
+            decoder.processSerial(newdata)
+            receivedImgs.set(list(decoder.Z.keys()))
+            for key in decoder.Z.keys():
+                imagedata = Image.fromarray(decoder.Z[key])
+                imagedata.thumbnail([320,240])
+                imagedata=ImageTk.PhotoImage(imagedata)
+                imageCanvas.create_image(0,0,image=imagedata, anchor=NW)
+                imageCanvas.image=imagedata
+                if not os.path.exists(key):
+                    os.makedirs(key)
+                imageio.imwrite(key+'/raw.bmp', decoder.Z[key])
+                with open(key+'/pixels.json', 'w') as f:
+                    json.dump((decoder.pixelsY[key], decoder.pixelsCbCr[key]),f)
+    root.after(int(60/int(packetrateVar.get())*1000), processControls)
+
+root.after(1000, processControls)
+
+def closeHandler(*args):
+    if ser.is_open:
+        ser.close()
+    root.destroy()
+
+root.protocol("WM_DELETE_WINDOW", closeHandler)
 root.mainloop()

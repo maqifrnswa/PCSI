@@ -36,6 +36,7 @@ class PCSIkissTX:
                         else [address.split('-')[0], 0] for address in addressList]
         print(addressList)
         self.addressHeader = self.ax25ifyAddresses(addressList)
+        self.currentPacket = 0
 
     def ax25ifyAddresses(self, addresses):  # address is a string
         """
@@ -74,10 +75,13 @@ class PCSIkissTX:
         maxPacketRate in packets per minute
         '''
         for n in range(totalPackets):
-            completePacket = self.addressHeader + self.txImage.genPayload(n)
-            kissifiedPacket = self.kissifyPacket(completePacket)
-            self.ser.write(kissifiedPacket)
+            self.sendPacket(n)
             time.sleep(1 / maxPacketRate * 60)
+
+    def sendPacket(self, n):
+        completePacket = self.addressHeader + self.txImage.genPayload(n)
+        kissifiedPacket = self.kissifyPacket(completePacket)
+        self.ser.write(kissifiedPacket)
 
     def setPersistence(self, persistence):
         '''
