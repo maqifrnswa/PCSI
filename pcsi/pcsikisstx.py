@@ -28,6 +28,7 @@ class PCSIkissTX:
         '''
         self.ser = ser
         self.txImage = txImage
+        self.lastTime = 0
         addressList = [destination, source] + digipeaters
         print(addressList)
 

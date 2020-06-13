@@ -9,6 +9,7 @@ Created on Thu Jun 11 11:36:30 2020
 from tkinter import *
 from tkinter import ttk, filedialog
 import os
+import time
 import json
 import serial.tools.list_ports
 from PIL import ImageTk, Image
@@ -89,7 +90,6 @@ def connectPort(*args):
         connectedVar.set("Connected: " + portsbox.get(portsbox.curselection()))# with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
     except serial.SerialException:
         connectedVar.set("Failed to connect")# with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
-        pass
 
 ttk.Button(serialframe,text="Connect",command=connectPort).grid(column=0, row=2,columnspan=2,sticky=(N,W,E))
 connectedVar = StringVar()
@@ -124,7 +124,7 @@ testing=ImageTk.PhotoImage(Image.open("/home/showard/compressedsensing/PCSI/HAB2
 #imageCanvas.create_image(0,0,image=testing, anchor=NW)
 #imageCanvas.image=testing
 
-imagedataFrame = ttk.Labelframe(mainframe, text="Image Data",padding=defaultPadding)
+imagedataFrame = ttk.Labelframe(mainframe, text="TX Image Data",padding=defaultPadding)
 imagedataFrame.grid(column=2,row=0,sticky=(N, W, E, S))
 #imagedataFrame.columnconfigure(0, weight=1)
 #imagedataFrame.rowconfigure(0, weight=1)
@@ -197,10 +197,16 @@ def transmitStop(*args):
     transmitting = False
     transmitStatus.set("TX Status: Stopped")
 
-ttk.Button(txinfoFrame, text="TX Start", command=transmitStart).grid(column=0, row=11, sticky=(N, W, E))
-ttk.Button(txinfoFrame, text="TX Pause", command=transmitStop).grid(column=0, row=12, sticky=(N, W, E))
+def transmitCont(*args):
+    global transmitting
+    transmitting = True
+    transmitStatus.set("TX Status: Running")
+
+ttk.Button(txinfoFrame, text="TX Start/Restart", command=transmitStart).grid(column=0, row=11, sticky=(N, W, E))
 transmitStatus=StringVar()
-ttk.Label(txinfoFrame, textvariable=transmitStatus).grid(column=0, row=13, sticky=(N, W, E))
+ttk.Label(txinfoFrame, textvariable=transmitStatus).grid(column=0, row=12, sticky=(N, W, E))
+ttk.Button(txinfoFrame, text="TX Pause", command=transmitStop).grid(column=0, row=13, sticky=(N, W, E))
+ttk.Button(txinfoFrame, text="TX Continue", command=transmitCont).grid(column=0, row=14, sticky=(N, W, E))
 
 rxFrame = ttk.Labelframe(mainframe, text="RX Control",padding=defaultPadding)
 rxFrame.grid(column=3,row=0,rowspan=3,sticky=(N, W, E, S))
@@ -212,13 +218,11 @@ def receiveStart(*args):
     global receiving
     receiving = True
     receiveStatus.set("RX Status: Running")
-    pass
 
 def receiveStop(*args):
     global receiving
     receiving = False
     receiveStatus.set("RX Status: Stopped")
-    pass
 
 decoder = PCSIDecoder()
 receiving = False
@@ -231,14 +235,47 @@ receivedImgs = StringVar()
 receivedList = Listbox(rxFrame, listvariable=receivedImgs, height=5)
 receivedList.grid(column=0, row=3,sticky=(N,W,E))
 
+def displayArrayImage(choosenImageSelected):
+    imagedata = Image.fromarray(decoder.Z[choosenImageSelected])
+    imagedata.thumbnail([320,240])
+    imagedata=ImageTk.PhotoImage(imagedata)
+    imageCanvas.create_image(0,0,image=imagedata, anchor=NW)
+    imageCanvas.image=imagedata
+    ny = decoder.nynx[choosenImageSelected][0]
+    nx = decoder.nynx[choosenImageSelected][1]
+    pixelsY= len(decoder.pixelsY[choosenImageSelected]) # number of pix received, effectively
+    choosenImageData.set("{:d}x{:d}={:d}px".format(ny,nx,ny*nx))
+    choosenImageProgress.set("{0:d} received = {1:3.1f}%".format(pixelsY, 100*pixelsY/(ny*nx)))
+
+def chooseImage(*args):
+    choosenImageSelected = receivedList.get(receivedList.curselection())
+    choosenImage.set(choosenImageSelected)
+    displayArrayImage(choosenImageSelected)
+
+ttk.Button(rxFrame, text = "Select Image Preview", command = chooseImage).grid(column=0, row=2, sticky=N)
+choosenImage=StringVar()
+ttk.Label(rxFrame, textvar=choosenImage).grid(column=0, row=4, sticky=N)
+choosenImageData=StringVar()
+ttk.Label(rxFrame, textvar=choosenImageData).grid(column=0, row=5, sticky=N)
+choosenImageProgress=StringVar()
+ttk.Label(rxFrame, textvar=choosenImageProgress).grid(column=0, row=6, sticky=N)
+
+
+
+
+
+
 def processControls(*args):
+    print([transmitting,receiving])
     if transmitting & (callSign.get() == "NOCALL"):
             print("Callsign must be set")
             transmitStop()
     elif transmitting:
         global kissTX
-        kissTX.sendPacket(kissTX.currentPacket)
-        kissTX.currentPacket += 1
+        if (time.time_ns() - kissTX.lastTime) > (60/int(packetrateVar.get())*1e9):
+            kissTX.sendPacket(kissTX.currentPacket)
+            kissTX.currentPacket += 1
+            kissTX.lastTime = time.time_ns()
     if receiving:
         print('checking for packet')
         newdata = ser.read(2000)
@@ -247,17 +284,18 @@ def processControls(*args):
             decoder.processSerial(newdata)
             receivedImgs.set(list(decoder.Z.keys()))
             for key in decoder.Z.keys():
-                imagedata = Image.fromarray(decoder.Z[key])
-                imagedata.thumbnail([320,240])
-                imagedata=ImageTk.PhotoImage(imagedata)
-                imageCanvas.create_image(0,0,image=imagedata, anchor=NW)
-                imageCanvas.image=imagedata
+                print(key)
+                print(choosenImage.get())
+                if key == choosenImage.get():
+                    displayArrayImage(key)
                 if not os.path.exists(key):
                     os.makedirs(key)
                 imageio.imwrite(key+'/raw.bmp', decoder.Z[key])
                 with open(key+'/pixels.json', 'w') as f:
                     json.dump((decoder.pixelsY[key], decoder.pixelsCbCr[key]),f)
-    root.after(int(60/int(packetrateVar.get())*1000), processControls)
+    root.after(100, processControls)
+    # Maybe make it run faster and just check ticks since last acquisition in
+    # transmitting and receiving separately
 
 root.after(1000, processControls)
 

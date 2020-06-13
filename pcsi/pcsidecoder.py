@@ -50,6 +50,7 @@ class PCSIDecoder():
         self.serialBuffer = b''
         self.pixelsY = {}
         self.pixelsCbCr = {}
+        self.nynx = {}
         # self.uninit=1
     def processSerial(self, rawSerial):
         """
@@ -115,6 +116,7 @@ class PCSIDecoder():
                     self.Z[hashID] = np.zeros((ny,nx,3), dtype='uint8')
                     self.pixelsY[hashID] = []
                     self.pixelsCbCr[hashID] = []
+                    self.nynx[hashID] = (ny,nx)
                 self.Z[hashID][:,:,0].T.flat[pixelID] = np.around(pixelYData)
                 # self.Z[:,:,0].T.flat[pixelID] <<= (8-channelBD)
                 self.Z[hashID][:,:,1].T.flat[pixelID[:len(pixelCbData)]] = np.around(pixelCbData)
