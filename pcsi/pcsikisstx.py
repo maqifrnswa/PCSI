@@ -83,6 +83,7 @@ class PCSIkissTX:
         completePacket = self.addressHeader + self.txImage.genPayload(n)
         kissifiedPacket = self.kissifyPacket(completePacket)
         self.ser.write(kissifiedPacket)
+        print(kissifiedPacket)
 
     def setPersistence(self, persistence):
         '''
