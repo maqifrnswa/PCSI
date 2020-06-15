@@ -114,8 +114,8 @@ class PCSIDecoder():
 
                 if hashID not in self.Z:
                     self.Z[hashID] = np.zeros((ny,nx,3), dtype='uint8')
-                    self.pixelsY[hashID] = []
-                    self.pixelsCbCr[hashID] = []
+                    self.pixelsY[hashID] = set()
+                    self.pixelsCbCr[hashID] = set()
                     self.nynx[hashID] = (ny,nx)
                 self.Z[hashID][:,:,0].T.flat[pixelID] = np.around(pixelYData)
                 # self.Z[:,:,0].T.flat[pixelID] <<= (8-channelBD)
@@ -125,6 +125,6 @@ class PCSIDecoder():
                 # self.Z[:,:,2].T.flat[pixelID] <<= (8-channelBD)
                 # self.Z = self.Z << (8-channelBD)  # (Z >> (8-channelBD) ) << (8-channelBD) # /(2**channelBD-1)*255
                 # self.Z = ycbcr2rgb(self.Z.astype(float))
-                self.pixelsY[hashID].extend(pixelID)
-                self.pixelsCbCr[hashID].extend(pixelID[:len(pixelCrData)])
+                self.pixelsY[hashID].update(pixelID)
+                self.pixelsCbCr[hashID].update(pixelID[:len(pixelCrData)])
                 self.serialBuffer = raw[-1].tobytes()

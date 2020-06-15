@@ -386,7 +386,7 @@ def processControls(*args):
                     os.makedirs(savedirname.get()+"/"+key)
                 imageio.imwrite(savedirname.get()+"/"+key+'/raw.bmp', decoder.Z[key])
                 with open(savedirname.get()+"/"+key+'/pixels.json', 'w') as f:
-                    json.dump((decoder.pixelsY[key], decoder.pixelsCbCr[key]),f)
+                    json.dump((list(decoder.pixelsY[key]), list(decoder.pixelsCbCr[key])),f)
     if processing:
         if choosenImage.get():
             if pcsiRunning is False:
@@ -394,8 +394,8 @@ def processControls(*args):
                 x = threading.Thread(target=pcsiThread, args=(imageSelected,
                                                               decoder.Z[imageSelected][:],
                                                               decoder.nynx[imageSelected][:],
-                                                              decoder.pixelsY[imageSelected][:],
-                                                              decoder.pixelsCbCr[imageSelected][:]))
+                                                              list(decoder.pixelsY[imageSelected]),
+                                                              list(decoder.pixelsCbCr[imageSelected])))
                 x.start()
         else:
             print("Select image to process")
