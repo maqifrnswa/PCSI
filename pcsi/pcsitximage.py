@@ -73,7 +73,7 @@ class PCSItxImage:
         for pixelNum in self.pixelList[startingPixel:startingPixel+self.numYCbCr]:
             packString = 'uint:' + str(int(self.bitDepth/3)) + ', uint:' + str(int(self.bitDepth/3)) + ', uint:'+ str(int(self.bitDepth/3))
             Y = round(self.XYCbCr[:,:,0].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
-            Cb = round(self.XYCbCr[:,:,2].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
+            Cb = round(self.XYCbCr[:,:,1].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
             # Cr = int.to_bytes(int(XYCbCr[:,:,2].flat[pixelNum]),1,"big")
             Cr = round(self.XYCbCr[:,:,2].T.flat[pixelNum] / (2**8-1) * (2**(self.bitDepth/3)-1))
             dataToSend = dataToSend + bitstring.pack(packString, Y, Cb, Cr)

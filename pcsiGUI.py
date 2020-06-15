@@ -36,8 +36,6 @@ root.rowconfigure(0, weight=1)
 
 callframe = ttk.Labelframe(mainframe,text="Identification",padding=defaultPadding)
 callframe.grid(column=0, row=0, sticky=(N, W, E, S))
-#callframe.columnconfigure(0, weight=1)
-#callframe.rowconfigure(0, weight=1)
 
 ttk.Label(callframe, text="Callsign:").grid(column=0, row=0, sticky=(N, W, E))
 callSign = StringVar()
@@ -51,8 +49,6 @@ ttk.Entry(callframe, textvariable=destNet, width=8).grid(column=0,row=4, sticky=
 
 packetconfigframe = ttk.Labelframe(mainframe,text="Packet Configuration",padding=defaultPadding)
 packetconfigframe.grid(column=0, row=1, sticky=(N, W, E, S))
-#packetconfigframe.columnconfigure(0, weight=1)
-#packetconfigframe.rowconfigure(0, weight=1)
 
 aprsPrefix = StringVar()
 ttk.Checkbutton(packetconfigframe, text="APRS info prefix", variable=aprsPrefix).grid(column=0,row=0,stick=(N,W,E))
@@ -66,8 +62,6 @@ ttk.Entry(packetconfigframe, textvariable=infoBytesVar, width=8).grid(column=0,r
 
 serialframe = ttk.Labelframe(mainframe,text="Serial Config",padding=defaultPadding)
 serialframe.grid(column=0, row=2, sticky=(N, W, E, S))
-#serialframe.columnconfigure(0, weight=1)
-#serialframe.rowconfigure(0, weight=1)
 
 portsVar = StringVar()
 
@@ -123,7 +117,7 @@ def connectTCP(*args):
     ser.connect((tcphost,tcpport))
     ser.settimeout(0)
     tcpconnectedVar.set("Connected to {}:{}".format(tcphost,tcpport))
-    #ser.write(b'\xc0\x00\xa0\x86\xa6\x92@@\xe0\x96\x88r\xa0\x88\xa0`\xae\x92\x88\x8ab@b\xae\x92\x88\x8ad@c\x03\xf0{{V!"p\\!"$p3\'ik\'2-e:OG7B!5z>s&p,c1yOX(Al<*v4pG{mNeuPwPXN,&`=8;H-1.&Uw]#7zYn@^\\yjNZCUIP4QA+dFZ%Fs{*Y8t$HiZ;#`lG\\=R`q`3;pF&.6!-TX)k7S"z!!7hW8D8+D(SNT`B%OS{/2Q%%&T"3CHb+SgjZ,3esRgr"*"qE_=_,{9<,8,`1r:(\\=$Z.t$X$aTx#m8^0a&mNl8K%RX8h>>]/zESeI>8Q`dzTJ!3S0_GbLPm!"\xc0')
+    # ser.write(b'\xc0\x00\xa0\x86\xa6\x92@@\xe0\x96\x88r\xa0\x88\xa0`\xae\x92\x88\x8ab@b\xae\x92\x88\x8ad@c\x03\xf0{{V!"p\\!"$p3\'ik\'2-e:OG7B!5z>s&p,c1yOX(Al<*v4pG{mNeuPwPXN,&`=8;H-1.&Uw]#7zYn@^\\yjNZCUIP4QA+dFZ%Fs{*Y8t$HiZ;#`lG\\=R`q`3;pF&.6!-TX)k7S"z!!7hW8D8+D(SNT`B%OS{/2Q%%&T"3CHb+SgjZ,3esRgr"*"qE_=_,{9<,8,`1r:(\\=$Z.t$X$aTx#m8^0a&mNl8K%RX8h>>]/zESeI>8Q`dzTJ!3S0_GbLPm!"\xc0')
 
 
 ttk.Button(kisstcpframe,text="Connect",command=connectTCP).grid(column=0, row=2,columnspan=2,sticky=(N,W,E))
@@ -131,16 +125,6 @@ tcpconnectedVar = StringVar()
 tcpconnectedVar.set("Not connected")
 ttk.Label(kisstcpframe,textvar=tcpconnectedVar).grid(column=0, row=3,columnspan=2,sticky=(N,W))
 
-# can add KISS TCP
-# create an object that works like serial ser.write, ser.is_open, ser.read
-# subclass of socket with write is_open and read?
-# s = socket.socket()
-# s.connect(('localhost',8001))
-# s.settimeout(0)
-# s.sendall(b'\xc0\x00\xa0\x86\xa6\x92@@\xe0\x96\x88r\xa0\x88\xa0`\xae\x92\x88\x8ab@b\xae\x92\x88\x8ad@c\x03\xf0{{V!"p\\!"$p3\'ik\'2-e:OG7B!5z>s&p,c1yOX(Al<*v4pG{mNeuPwPXN,&`=8;H-1.&Uw]#7zYn@^\\yjNZCUIP4QA+dFZ%Fs{*Y8t$HiZ;#`lG\\=R`q`3;pF&.6!-TX)k7S"z!!7hW8D8+D(SNT`B%OS{/2Q%%&T"3CHb+SgjZ,3esRgr"*"qE_=_,{9<,8,`1r:(\\=$Z.t$X$aTx#m8^0a&mNl8K%RX8h>>]/zESeI>8Q`dzTJ!3S0_GbLPm!"\xc0')
-# ready = select.select([s],[],[],0)
-# if ready[0]:
-#     data = s.recv(1024)  # but will BlockingIOError if not available
 
 def loadfile(*args):
     filename = filedialog.askopenfilename()
@@ -151,30 +135,19 @@ def loadfile(*args):
     imagedata=ImageTk.PhotoImage(imagedata)
     imageCanvas.create_image(0,0,image=imagedata, anchor=NW)
     imageCanvas.image=imagedata  # see: http://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
-    #imageCanvas.image=testing2
- #   imageCanvas.itemconfigure(image=testing2)
-
-    #imageCanvas.create_image(image=myimg)
 
 
 ttk.Button(mainframe,text="Load Image",command=loadfile).grid(column=1, row=3, sticky=(N))#, W, E, S))
 
 imageFrame = ttk.Labelframe(mainframe, text="Image preview",padding=defaultPadding)
 imageFrame.grid(column=1,row=0, rowspan=3,sticky=(N, W, E, S))
-#imageFrame.columnconfigure(0, weight=1)
-#imageFrame.rowconfigure(0, weight=1)
 imageCanvas = Canvas(imageFrame, width=320, height=240)
 imageCanvas.grid(column=0,row=0, sticky=(N, W))
 imageCanvas2 = Canvas(imageFrame, width=320, height=240)
 imageCanvas2.grid(column=0,row=1, sticky=(N, W))
-testing=ImageTk.PhotoImage(Image.open("/home/showard/compressedsensing/PCSI/HAB2sstv.bmp"))
-#imageCanvas.create_image(0,0,image=testing, anchor=NW)
-#imageCanvas.image=testing
 
 imagedataFrame = ttk.Labelframe(mainframe, text="TX Image Data",padding=defaultPadding)
 imagedataFrame.grid(column=2,row=0,sticky=(N, W, E, S))
-#imagedataFrame.columnconfigure(0, weight=1)
-#imagedataFrame.rowconfigure(0, weight=1)
 imagefilename = StringVar()
 ttk.Label(imagedataFrame, textvariable=imagefilename, wraplength=200).grid(column=0, row=0, sticky=(N, W))
 dimVar = StringVar()
@@ -257,8 +230,17 @@ ttk.Button(txinfoFrame, text="TX Continue", command=transmitCont).grid(column=0,
 
 rxFrame = ttk.Labelframe(mainframe, text="RX Control",padding=defaultPadding)
 rxFrame.grid(column=3,row=0,rowspan=3,sticky=(N, W, E, S))
-#rxFrame.columnconfigure(0, weight=1)
-#rxFrame.rowconfigure(0, weight=1)
+
+
+def savedir(*args):
+    dirname = filedialog.askdirectory()
+    if dirname:
+        savedirname.set(dirname)
+
+
+ttk.Button(rxFrame,text="Choose Directory",command=savedir).grid(column=0, row=0, sticky=(N))#, W, E, S))
+savedirname = StringVar(value = os.path.expanduser("~/pcsi-data"))
+ttk.Label(rxFrame,textvar=savedirname,wraplength=200).grid(column=0, row=1, sticky=(N))#, W, E, S))
 
 
 def receiveStart(*args):
@@ -266,21 +248,24 @@ def receiveStart(*args):
     receiving = True
     receiveStatus.set("RX Status: Running")
 
+
 def receiveStop(*args):
     global receiving
     receiving = False
     receiveStatus.set("RX Status: Stopped")
 
+
 decoder = PCSIDecoder()
 receiving = False
-ttk.Button(rxFrame, text = "RX Start", command = receiveStart).grid(column=0, row=0, sticky=N)
-ttk.Button(rxFrame, text = "RX Stop", command = receiveStop).grid(column=0, row=1, sticky=N)
+ttk.Button(rxFrame, text = "RX Start", command = receiveStart).grid(column=0, row=2, sticky=N)
+ttk.Button(rxFrame, text = "RX Stop", command = receiveStop).grid(column=0, row=3, sticky=N)
 receiveStatus = StringVar()
 receiveStatus.set("RX Status: Stopped")
-ttk.Label(rxFrame, textvariable=receiveStatus).grid(column=0, row=2, sticky=N)
+ttk.Label(rxFrame, textvariable=receiveStatus).grid(column=0, row=4, sticky=N)
 receivedImgs = StringVar()
 receivedList = Listbox(rxFrame, listvariable=receivedImgs, height=5)
-receivedList.grid(column=0, row=3,sticky=(N,W,E))
+receivedList.grid(column=0, row=5,sticky=(N,W,E))
+
 
 def displayArrayImage(choosenImageSelected):
     imagedata = Image.fromarray(decoder.Z[choosenImageSelected])
@@ -294,24 +279,29 @@ def displayArrayImage(choosenImageSelected):
     choosenImageData.set("{:d}x{:d}={:d}px".format(ny,nx,ny*nx))
     choosenImageProgress.set("{0:d} received = {1:3.1f}%".format(pixelsY, 100*pixelsY/(ny*nx)))
 
+
 def chooseImage(*args):
     choosenImageSelected = receivedList.get(receivedList.curselection())
     choosenImage.set(choosenImageSelected)
     displayArrayImage(choosenImageSelected)
 
-ttk.Button(rxFrame, text = "Select Image Preview", command = chooseImage).grid(column=0, row=2, sticky=N)
+
+ttk.Button(rxFrame, text = "Select Image Preview", command = chooseImage).grid(column=0, row=6, sticky=N)
 choosenImage=StringVar()
-ttk.Label(rxFrame, textvar=choosenImage).grid(column=0, row=4, sticky=N)
+ttk.Label(rxFrame, textvar=choosenImage).grid(column=0, row=7, sticky=N)
 choosenImageData=StringVar()
-ttk.Label(rxFrame, textvar=choosenImageData).grid(column=0, row=5, sticky=N)
+ttk.Label(rxFrame, textvar=choosenImageData).grid(column=0, row=8, sticky=N)
 choosenImageProgress=StringVar()
-ttk.Label(rxFrame, textvar=choosenImageProgress).grid(column=0, row=6, sticky=N)
+ttk.Label(rxFrame, textvar=choosenImageProgress).grid(column=0, row=9, sticky=N)
 
 processing = False
+
+
 def processStart(*args):
     global processing
     processing = True
     processText.set("Processing PCSI")
+
 
 def processStop(*args):
     global processing
@@ -319,45 +309,49 @@ def processStop(*args):
     processText.set("Stopped PCSI")
 
 
-ttk.Button(rxFrame, text = "Process PCSI", command = processStart).grid(column=0, row=7, sticky=N)
-ttk.Button(rxFrame, text = "Stop PCSI", command = processStop).grid(column=0, row=8, sticky=N)
+ttk.Button(rxFrame, text = "Process PCSI", command = processStart).grid(column=0, row=10, sticky=N)
+ttk.Button(rxFrame, text = "Stop PCSI", command = processStop).grid(column=0, row=11, sticky=N)
 processText = StringVar()
-ttk.Label(rxFrame, textvar=processText).grid(column=0, row=9, sticky=N)
+ttk.Label(rxFrame, textvar=processText).grid(column=0, row=12, sticky=N)
 
 
 pcsiRunning = False
-def pcsiThread():
-    print("sdfffffffffffffffffffffffffffffffffffffffffffffff")
+
+
+def pcsiThread(imageSelected, X, nynx, pixelsY, pixelsCbCr):
     global pcsiRunning
     pcsiRunning = True
-    choosenImageSelected = choosenImage.get()
-    Z = np.zeros(decoder.Z[choosenImageSelected].shape, dtype='uint8')
-    ny = decoder.nynx[choosenImageSelected][0]
-    nx = decoder.nynx[choosenImageSelected][1]
-    XY = decoder.Z[choosenImageSelected][:,:,0]
-    XCb = decoder.Z[choosenImageSelected][:,:,1]
-    XCr = decoder.Z[choosenImageSelected][:,:,2]
-    riY = decoder.pixelsY[choosenImageSelected]
-    riCbCr = decoder.pixelsCbCr[choosenImageSelected]
+    Z = np.zeros(X.shape, dtype='uint8')
+    ny = nynx[0]
+    nx = nynx[1]
+    XY = X[:,:,0]
+    XCb = X[:,:,1]
+    XCr = X[:,:,2]
+    riY = pixelsY
+    riCbCr = pixelsCbCr
     bY = XY.T.flat[riY].astype(float)
     bCb = XCb.T.flat[riCbCr].astype(float)
     bCr = XCr.T.flat[riCbCr].astype(float)
-    pcsiSolver = PCSIolw(nx, ny, bY, riY)
-    Z[:,:,0] = pcsiSolver.go().astype('uint8')# choosenImage.get()
-    pcsiSolver = PCSIolw(nx, ny, bCb, riCbCr)
-    Z[:,:,1] = pcsiSolver.go().astype('uint8')# choosenImage.get()
-    pcsiSolver = PCSIolw(nx, ny, bCr, riCbCr)
-    Z[:,:,2] = pcsiSolver.go().astype('uint8')# choosenImage.get()
+    # print([bY.shape, len(riY)])
+    pcsiSolverY = PCSIolw(nx, ny, bY, riY)
+    Z[:,:,0] = pcsiSolverY.go().astype('uint8')# choosenImage.get()
+    pcsiSolverCb = PCSIolw(nx, ny, bCb, riCbCr)
+    Z[:,:,1] = pcsiSolverCb.go().astype('uint8')# choosenImage.get()
+    pcsiSolverCr = PCSIolw(nx, ny, bCr, riCbCr)
+    Z[:,:,2] = pcsiSolverCr.go().astype('uint8')# choosenImage.get()
     Z=ycbcr2rgb(Z)
     imagedata = Image.fromarray(Z)
     imagedata.thumbnail([320,240])
     imagedata=ImageTk.PhotoImage(imagedata)
     imageCanvas2.create_image(0,0,image=imagedata, anchor=NW)
     imageCanvas2.image=imagedata
+    imageio.imwrite(savedirname.get()+"/"+imageSelected+'/pcsi_processed.bmp', Z)
     pcsiRunning = False
 
 
-practicedata=1  # set to 1 to inject practice data once
+practicedata = 0  # set to 1 to inject practice data once
+
+
 def processControls(*args):
     if transmitting & (callSign.get() == "NOCALL"):
         print("Callsign must be set")
@@ -375,53 +369,38 @@ def processControls(*args):
         print("Connect to serial port first")
         receiveStop()
     elif receiving:
-        print('checking for packet')
+        # print('checking for packet')
         newdata = ser.read(2000)
-        global garbage
+        global practicedata
         if practicedata:
             newdata = b'\xc0\x00\xa0\x86\xa6\x92@@\xe0\x96\x88r\xa0\x88\xa0`\xae\x92\x88\x8ab@b\xae\x92\x88\x8ad@c\x03\xf0{{V!"p\\!"$p3\'ik\'2-e:OG7B!5z>s&p,c1yOX(Al<*v4pG{mNeuPwPXN,&`=8;H-1.&Uw]#7zYn@^\\yjNZCUIP4QA+dFZ%Fs{*Y8t$HiZ;#`lG\\=R`q`3;pF&.6!-TX)k7S"z!!7hW8D8+D(SNT`B%OS{/2Q%%&T"3CHb+SgjZ,3esRgr"*"qE_=_,{9<,8,`1r:(\\=$Z.t$X$aTx#m8^0a&mNl8K%RX8h>>]/zESeI>8Q`dzTJ!3S0_GbLPm!"\xc0'
             practicedata = 0
-        print(newdata)
+        #print(newdata)
         if newdata:
             decoder.processSerial(newdata)
             receivedImgs.set(list(decoder.Z.keys()))
             for key in decoder.Z.keys():
-                print(key)
-                print(choosenImage.get())
                 if key == choosenImage.get():
                     displayArrayImage(key)
-                if not os.path.exists(key):
-                    os.makedirs(key)
-                imageio.imwrite(key+'/raw.bmp', decoder.Z[key])
-                with open(key+'/pixels.json', 'w') as f:
+                if not os.path.exists(savedirname.get()+"/"+key):
+                    os.makedirs(savedirname.get()+"/"+key)
+                imageio.imwrite(savedirname.get()+"/"+key+'/raw.bmp', decoder.Z[key])
+                with open(savedirname.get()+"/"+key+'/pixels.json', 'w') as f:
                     json.dump((decoder.pixelsY[key], decoder.pixelsCbCr[key]),f)
     if processing:
         if choosenImage.get():
             if pcsiRunning is False:
-                print("\n yesyseyys")
-                x = threading.Thread(target=pcsiThread)
+                imageSelected = choosenImage.get()
+                x = threading.Thread(target=pcsiThread, args=(imageSelected,
+                                                              decoder.Z[imageSelected][:],
+                                                              decoder.nynx[imageSelected][:],
+                                                              decoder.pixelsY[imageSelected][:],
+                                                              decoder.pixelsCbCr[imageSelected][:]))
                 x.start()
-                print(x)
-
-            # if thread isn't running, run the thread function
-            # create a global PCSIolw object for each channel?
-            # if threads are not running
-                # create flag for threads running TRUE
-                # for each color channel j (in own thread?)
-                # pcsiSolver = PCSIolw(nx, ny, b, ri)
-                # store the image in the PCSIolw object?
-                # Z[:,:,j] = pcsiSolver.go().astype('uint8') # don't return, update image in object
-            # when threads done:
-            # Z[:,:,:] = ycbcr2rgb(Z[:,:,:])
-            # Save image
-            # Display image
-            # set threads flag to FALSE
         else:
             print("Select image to process")
             processStop()
     root.after(100, processControls)
-    # Maybe make it run faster and just check ticks since last acquisition in
-    # transmitting and receiving separately
 
 root.after(1000, processControls)
 
@@ -429,6 +408,7 @@ def closeHandler(*args):
     if ser.is_open:
         ser.close()
     root.destroy()
+
 
 root.protocol("WM_DELETE_WINDOW", closeHandler)
 root.mainloop()
