@@ -42,7 +42,10 @@ class PCSItxImage:
             self.totalPayloadBits = infoBytes*8
         payloadImageBits = self.totalPayloadBits - 8*7  # 7 info header bytes
         Xorig = imageio.imread(filename)
-        self.XYCbCr = rgb2ycbcr(Xorig)
+        # must be multiples of 16
+        Xorig = Xorig[0:Xorig.shape[0]//16*16,0:Xorig.shape[1]//16*16,:]
+
+        self.XYCbCr = rgb2ycbcr(Xorig)  # needs to be multiples of 16
         self.ny, self.nx, self.nchan = Xorig.shape
         self.numYCbCr, self.numY = numPixelsSent(1,
                                                  bitDepth,
