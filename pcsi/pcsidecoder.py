@@ -24,7 +24,7 @@ def unkissifyPacket(packet):
     del packet[0:16]  # the 0xc000 from the KISS TNC, 0xC0 frame, 0x00 means data from TNC port0
     packet.replace('0xdbdd','0xdb',bytealigned=True)
     packet.replace('0xdbdc','0xc0',bytealigned=True)
-    return  packet
+    return packet
 
 
 def unax25ifyAddresses(packet):
@@ -72,7 +72,7 @@ class PCSIDecoder():
                 PIDField = unkissPacket.read(8)
                 if(unkissPacket.peek(24)==b'{{V'):
                     unkissPacket.read(24)
-                if(isBase91(unkissPacket.peek(64).bytes)):
+                if(isBase91(unkissPacket.peek(len(unkissPacket)-unkissPacket.pos).bytes)):
                     unkissPacket = base91tobytes(unkissPacket)
                 imageID = unkissPacket.read('uint:8')
                 ny= unkissPacket.read('uint:8')*16

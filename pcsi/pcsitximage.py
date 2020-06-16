@@ -37,7 +37,7 @@ class PCSItxImage:
         infoBytes = infoBytes - len(self.prefixBytes)
         if base91:
             # if done 13 bits at a time, worst case for base91
-            self.totalPayloadBits = 13 * int(infoBytes / 2)
+            self.totalPayloadBits = 13 * infoBytes // 2 + 6 * infoBytes % 2
         else:
             self.totalPayloadBits = infoBytes*8
         payloadImageBits = self.totalPayloadBits - 8*7  # 7 info header bytes
@@ -60,6 +60,7 @@ class PCSItxImage:
                 self.numYCbCr,
                 int(self.bitDepth/3-1))
         startingPixel = packetNum * (self.numYCbCr + self.numY)
+        print([self.numYCbCr, self.numY])
 
         # Ytosend = np.zeros(numYCbCr+numY)
         # Yextratosend = XYCbCr[:,:,0].flat[pixelList[numYCbCr:numY]]

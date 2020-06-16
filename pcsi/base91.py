@@ -35,14 +35,15 @@ def bytestoBase91(data):
     while data.len - data.pos >= 13:
         bits = data.read('uint:13')
         base91data = base91data + chr((bits // 91) + 33) + chr((bits % 91) + 33)
-    if data.len - data.pos <= 6:  # lazy base91, technically it's 6 or 7 depending
-        data = data + BitStream(6 - (data.len - data.pos))  # pad up to 6
-        bits = data.read('uint:6')
-        base91data = base91data + chr(bits + 33)
-    else:  # the number of bits left is greater than equal to 7, less eq to 12
+    # lazy base91, technically it's 6 or 7 depending
+    if data.len - data.pos >= 7:  # the number of bits left is greater or equal to 7, less eq to 12
         data = data + BitStream(13 - (data.len - data.pos))  # zero pad
         bits = data.read('uint:13')
         base91data = base91data + chr((bits // 91) + 33) + chr((bits % 91) + 33)
+    elif data.len - data.pos > 0:  # number of bits left greater than 0 <= 6
+        data = data + BitStream(6 - (data.len - data.pos))  # pad up to 6
+        bits = data.read('uint:6')
+        base91data = base91data + chr(bits + 33)
     return base91data.encode()
 
 

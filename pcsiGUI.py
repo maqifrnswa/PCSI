@@ -184,19 +184,19 @@ packetrateVar = StringVar()
 packetrateVar.set(30)
 ttk.Entry(txinfoFrame, textvariable=packetrateVar).grid(column=0, row=10, sticky=(N, W, E))
 transmitting = False
-def transmitPCSI(*args):
-    if callSign.get() == "NOCALL":
-        print("Callsign must be set")
-        return
-    txImage = PCSItxImage(filename=imagefilename.get(),
-                      imageID=int(imageidVar.get()),
-                      bitDepth=int(bitdepthVar.get()),
-                      chromaCompression=int(ccVar.get()),
-                      infoBytes=int(infoBytesVar.get()),
-                      APRSprefixBytes=bool(aprsPrefix.get()),  # if we change this, we have to change the decode too
-                      base91=bool(usebase91.get()))
-    kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), [])
-    kissTX.send(int(numpacketVar.get()), int(packetrateVar.get()))
+#def transmitPCSI(*args):
+#    if callSign.get() == "NOCALL":
+#        print("Callsign must be set")
+#        return
+#    txImage = PCSItxImage(filename=imagefilename.get(),
+#                      imageID=int(imageidVar.get()),
+#                      bitDepth=int(bitdepthVar.get()),
+#                      chromaCompression=int(ccVar.get()),
+#                      infoBytes=int(infoBytesVar.get()),
+#                      APRSprefixBytes=bool(aprsPrefix.get()),
+#                      base91=bool(usebase91.get()))
+#    kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), [])
+#    kissTX.send(int(numpacketVar.get()), int(packetrateVar.get()))
 
 def transmitStart(*args):
     global transmitting
@@ -207,7 +207,7 @@ def transmitStart(*args):
                           bitDepth=int(bitdepthVar.get()),
                           chromaCompression=int(ccVar.get()),
                           infoBytes=int(infoBytesVar.get()),
-                          APRSprefixBytes=bool(aprsPrefix.get()),  # if we change this, we have to change the decode too
+                          APRSprefixBytes=bool(aprsPrefix.get()),
                           base91=bool(usebase91.get()))
     kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), [])
     transmitStatus.set("TX Status: Running")
