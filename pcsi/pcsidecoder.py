@@ -62,12 +62,10 @@ class PCSIDecoder():
         """
         rawSerial = BitStream(self.serialBuffer+rawSerial)
         raw = [s for s in rawSerial.split('0xc0', bytealigned = True)]
-        print(raw)
         for packet in raw[:-1]:
             if len(packet) > 16:
                 unkissPacket = unkissifyPacket(packet)
                 addresses, unkissPacket.pos = unax25ifyAddresses(unkissPacket)
-                print(addresses)
                 controlField = unkissPacket.read(8)
                 PIDField = unkissPacket.read(8)
                 if(unkissPacket.peek(24)==b'{{V'):
@@ -80,9 +78,9 @@ class PCSIDecoder():
                 packetNum = unkissPacket.read('uint:16')
                 numYCbCr = unkissPacket.read('uint:8')
                 channelBD = unkissPacket.read('uint:8')+1
-                print([controlField, PIDField, imageID, ny, nx, packetNum, numYCbCr, channelBD])
+                # print([controlField, PIDField, imageID, ny, nx, packetNum, numYCbCr, channelBD])
                 hashID = addresses[0]+"/"+addresses[1]+"/"+str(imageID)
-                print(hashID)
+                # print(hashID)
                 pixelYData = []
                 pixelCbData = []
                 pixelCrData = []

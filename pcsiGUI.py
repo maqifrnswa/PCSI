@@ -45,6 +45,9 @@ destNet = StringVar()
 destNet.set("PCSI")
 ttk.Label(callframe, text="Dest/Net:").grid(column=0, row=3, sticky=(N, W, E))
 ttk.Entry(callframe, textvariable=destNet, width=8).grid(column=0,row=4, sticky=(N,W,E))
+digisListVar = StringVar()
+ttk.Label(callframe, text="Digis List:").grid(column=0, row=5, sticky=(N, W, E))
+ttk.Entry(callframe, textvariable=digisListVar).grid(column=0,row=6, sticky=(N,W,E))
 
 
 packetconfigframe = ttk.Labelframe(mainframe,text="Packet Configuration",padding=defaultPadding)
@@ -209,7 +212,9 @@ def transmitStart(*args):
                           infoBytes=int(infoBytesVar.get()),
                           APRSprefixBytes=bool(aprsPrefix.get()),
                           base91=bool(usebase91.get()))
-    kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), [])
+    digisList = []
+    digisList = digisListVar.get().replace(" ","").split(",")
+    kissTX = PCSIkissTX(txImage, ser, callSign.get(), destNet.get(), digisList)
     transmitStatus.set("TX Status: Running")
 
 def transmitStop(*args):

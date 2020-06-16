@@ -29,13 +29,11 @@ class PCSIkissTX:
         self.ser = ser
         self.txImage = txImage
         self.lastTime = 0
+        digipeaters = list(filter(None, digipeaters))  # remove empty strings
         addressList = [destination, source] + digipeaters
-        print(addressList)
-
 
         addressList = [[address.split('-')[0], int(address.split('-')[1])] if len(address.split('-')) == 2
                         else [address.split('-')[0], 0] for address in addressList]
-        print(addressList)
         self.addressHeader = self.ax25ifyAddresses(addressList)
         self.currentPacket = 0
 

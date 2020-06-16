@@ -60,13 +60,6 @@ class PCSItxImage:
                 self.numYCbCr,
                 int(self.bitDepth/3-1))
         startingPixel = packetNum * (self.numYCbCr + self.numY)
-        print([self.numYCbCr, self.numY])
-
-        # Ytosend = np.zeros(numYCbCr+numY)
-        # Yextratosend = XYCbCr[:,:,0].flat[pixelList[numYCbCr:numY]]
-
-        # YCbCr2send = [XYCbCr[:,:,c].flat[pixelList[:numYCbCr]] for c in range(3)]
-        # YCbCr2send = np.array(YCbCr2send).T
 
         dataToSend = header
         # pixels are numbered by columns first in PCSI
