@@ -78,6 +78,7 @@ class PCSIkissTX:
             time.sleep(1 / maxPacketRate * 60)
 
     def sendPacket(self, n):
+        n = n %(self.txImage.largestFullPacketNum+1) #  only send full packets
         completePacket = self.addressHeader + self.txImage.genPayload(n)
         kissifiedPacket = self.kissifyPacket(completePacket)
         self.ser.write(kissifiedPacket)

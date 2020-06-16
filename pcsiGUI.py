@@ -369,6 +369,7 @@ def processControls(*args):
         if (time.time_ns() - kissTX.lastTime) > (60/int(packetrateVar.get())*1e9):
             kissTX.sendPacket(kissTX.currentPacket)
             kissTX.currentPacket += 1
+            kissTX.currentPacket = kissTX.currentPacket%(kissTX.txImage.largestFullPacketNum +1)
             kissTX.lastTime = time.time_ns()
     if receiving & (ser.is_open is False):
         print("Connect to serial port first")
