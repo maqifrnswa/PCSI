@@ -1,7 +1,26 @@
 # Packet Compressed Sensing Imaging (PCSI)
-This repository holds the specefication and a usable reference implementation of PCSI.
+This project contains the sample program for how to use Packet Compressed Sensing Imaging (PCSI) to transmit images over unconnected, noisy, lossy channels.
 
-PCSI spec v0.0.0 (unreleased, versioning will follow semver 2.0)
+![PCSI Screenshot](./pcsiusage.png)
+
+Packet Compressed Sensing Imaging (PCSI) is a way to:
+* Send images over unconnected networks such as AX.25 in amateur radio or UDP
+* Each individual packet contains information about the entire image! That means that you start reconstructing the whole image after 1 packet. Each additional packet just improves image quality.
+* Packet loss does not really matter! Packet loss just decreases overall image quality, it does not cause parts of the image to be "blank" as in SSTV or SSDV.
+* Extremely low-computational power needed at transmitter! No FEC needed, no encoding/decoding jpeg, no compression - so a simple 8-bit microncontroller can easily transmit packets
+* If you "miss" the beginning, middle, or end of a transmisison, you can still see the whole image with high quality! Broadcast your images to be received by many people at once, each will reconstruct the image even if each receives different numbers and sequences of packets!
+* You can transmit sequence of images (movies), real-time emergency imaging data over noisy channels, or send imaging data from high altitude baloons with minimal computing power to be received by anyone interested in listening.
+
+The reference software included here allows you to:
+* Send and receive images using PCSI on Windows, Mac, and Linux. Pre-compiled binaries are available for Windows and Linux. Macs are doable too, I just don't have one to pre-compile binaries.
+* Connect to hardware TNCs using KISS serial or KISS TCP connections
+* Connect to sound card modems such as fldigi or direworlf to use any of those modes and hardware!
+* Therefore it's compatible with HF modes using fldigi or anything that accepts KISS connections
+* The software transmits packets compatible with the APRS network, so it is possible to relay images using the APRS network. (Use this with caution as APRS networks may not have the spare capacity in all regions, and images that are not timely or tactical may not be well suited for APRS.)
+
+Also included is the specification for the [pseudorandom data packet (PDP) protocol](./spec.md) that enables PCSI.
+
+Development information is available on [the project Github page](https://github.com/maqifrnswa/PCSI)
 
 Author: KD9PDP
 
@@ -10,81 +29,31 @@ License: GPL-3.0
 ## What is PCSI?
 PCSI is a way of transmitting imaging data over unconnected networks where receiving stations may each receive different random packets (due to corruption from noise or blocked signals) yet each receiving station can individually reconstruct the entire original image with high fidelity only with the packets it received. High quality, full frame images, can be reconstructed with as little as 10% of the original data being transmitted or received. Even if a receiver joins the broadcast mid-transmission, it will be able to reconstruct the full image.
 
-### PCSI Reference Application
-A remote amateur radio station on a high altitude balloon or satellite transmitting images back to ground stations. Remote station is assumed to have little computing power, so minimal processing will occur on the remote state. The link is unconnected (i.e., one directional broadcasts) and will lead to corrupted/lost packets.
+## How to install?
+Download from the [github releases page](https://github.com/maqifrnswa/PCSI/releases). Unzip the folder. Find "pcsiGUI.exe" and double click on it to run.
 
-### How to use the software
-Demo loading an image and transmitting over a TNC over KISS. Demo the receiving software for listening for packets on KISS and reconstructing the image.
+## How to use?
+### Transmitting Images
+See the following video and text below. In the video, PCSI is controlled on the left window, the right window is a terminal running direwolf. You could use fldigi or your hardware TNC as well.
+![Transmitting Demo](startTX.gif)
+1. Start your TNC (hardware or software)
+1. Open pcsiGUI.exe
+1. Enter in your callsign, your destination (could be a group name like "PCSI" or another callsign). Both take an optional SSID (e.g., KD9PDP or KD9PDP-3)
+1. Enter in a comma seperated list of digipeaters (optional, e.g., "WIDE1-1, WIDE2-1" without the quotes). Spaces are allowed. SSIDs are optional.
+1. Connect PCSI to your TNC using either serial or TCP KISS connections. For serial, select your device from the list and click "connect." for TCP, enter your hostname and port and hit connect.
+1. Click the "Load Image" button to load an image. Images will be cropped to be multiples of 16 pixels in width or height. 320x240 (typical SSTV resolution) work well.
+1. Configure PCSI for transmission:
+  1. TX Bit Depth: How accurate would like like the color transmitted? This number must be in multiples of 3. Twelve bit ("12") color is default and works well for many images. High values have better color accuracy but take longer to transmit. "True color" is 24 bit (e.g., enter "24"), 9-bit color looks like a Sega Genesis game system's display. Up to user to pick what they want.
+  1. TX Chroma Compression: The human eye resolves black and white with finer detail than color, so we don't have to send as much color information to receive the same quality image. A value of 1 indicates no compression. "20" works well for most images. Larger values is more compression and increases transmission speed while at a cost of image accuracy.
+  1. Image ID Number: give each transmission a unique number so the decoders know a new image has started.
+1. Click "TX Start/Restart." You're up and running!
 
-### How does it work (summary)
-Using compressed sensing imaging, one can reconstruct full images from random selections of pixels from that image. We therefore transmit random selections of pixels in each packet so that each packet contains information from the entire image, and combining multiple packets improves received image fidelity (e.g., resolution). A good intro is here: http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/.
-
-### What are current methods for sending images from balloons/remote control vehicles/rockets/etc.?
-* SSTV: A solid method. Can be sent using simple 8-bit mircocontrollers (e.g., HAMShield can do it). Drawbacks: Fading and signal loss means data corruption or loss. Not distributed signal collection.
-* MFSK,etc. using fldigi, other packet radio/data modes: Many ways of sending data. Drawbacks: Not easily done on 8 bit controllers (Raspberry Pi can, but I'm aiming for minimalist implementation). Not distributed signal collection, so if you lose signal, you lose data.
-* SSDV: UK's HAB community developed a great packet system, software, and relay network similar to APRS just for balloon launches. The system includes "SSDV," a technique to packetize JPEG images, have people from all over collect and upload packets, and have a centralized server reconstruct the packets (http://ssdv.habhub.org/). Info here (https://ukhas.org.uk/guides:ssdv). These packets aren't compatible with APRS, but can be integrated in to it, for example (http://idoroseman.com/ssdv-over-aprs/) and the pecanpico series here (https://github.com/DL7AD). Includes forward error correction (FEC) to recover from some data corruption. Drawbacks: in the US, we don't have a network of repeaters or igates to collect packets. Additionally, decoding/encoding packets with JPEG (technically JIFF file format) is a bit too much for an 8 bit processor with limited RAM. Finally, any lost packet equates to lost data.
-* APRS Vision System: At the 1997 DCCC conference, Bob Bruninga, WB4APR, (the original APRS!), proposed "APRS Vision System" (https://www.tapr.org/pdf/DCC1997-APRSvision-WB4APR.pdf). That approach found a way that the APRS network could relay tactical imaging information. The idea was to broadcast APRS packets that contain image information, starting with low spatial frequency content first, then increasingly more frequency content. When the image is "clear enough," the receiver can tell the sender to stop. This way the receiver can possible control or react to the image before the whole image became "clear." Drawbacks: Receiver needs to communicate with sender on missed packets and on stop. Any missed packet at all and whole system fails, which isn't great for APRS.
-
-### What does PCSI do that is special?
-* Every packet contains info of the entire image. Starting with the first packet, you get a complete full image (although terrible resolution). As you collect more packets, your resolution improves. If you lose a packet, who cares!
-  * Each packet of APRS Vision System also sends info on the whole image, but requires every previous packet to improve resolution. SSDV only sends tiles (JPEG MCUs) in each packet, so it will lose sections of the image if packets are lost. PCSI does not need or care about lost packets! (sounds like magic, but it's math!)
-* No computation needed on the balloon! Just pick out random pixels and send them (there's a system to keep track of which random pixels are chosen, because it is pseudo-random)
-  * All the other tenchniques requires some decent amount of computational encoding and decoding on the remote station. There is pretty much zero computational effort needed to transmit PCSI.
-* If a packet is lost, who cares! If a station starts listening mid-broadcast, it doesn't matter! You'll get the full image either way
-  * No other system allows you to join mid-broadcast and still reconstruct the whole image.
-* PCSI includes chroma compression and sparse sampling - so it basically is doing JPEG compression without doing any encoding or decoding at the transmitting station.
-
-## PCSI Spec
-The PCSI spec merely defines the packet payload. It can be used in any packet protocol. For example, the reference implementation is for APRS compatible AX.25 frames. The payload is designed to be similar to SSDV.
-
-### Packet Payload Preparation
-Given a bitmapped image to transfer, follow the following proceedures
-1. Using a pseudo-random number generator, generate the sequence of pixels to be transmitted
-1. Given the number of bits available in the payload (e.g., AX.25 UI frames have 256 bytes minus 7 bytes of image info equals 1992 bits total), the desired chroma compression level, and the desired color bit depth to transmit, determine the list of pixels to transmit that will be full color and solely back and white.
-  1. All packets consist of the same number of pixels (e.g., every packet for an image has exactly 25 YCbCr pixels and 75 Y only pixels for a total of 100 pixels. You can choose whatever numbers you want, as along as they are the same for every packet of the image).
-1. Prepare the packet payload
-  1. Convert full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec.
-  1. If color bit depth is being reduced, binary shift the pixels for the desired bit depth.
-
-### PCSI Payload Format
-* 1 byte image ID (uint8 from 0-255)
-* 1 byte number of lines in the image divided by 16 (uint8 with a max of 4096 lines)
-* 1 byte number of columns in the image divided by 16 (uint8 with a max of 4096 columns)
-* 2 bytes Packet ID (uint16 0-65535) to be used as the starting point of the pseudo-random pixel list
-* 1 byte: Number of full color pixels transmitted (number of YCbCr pixels as uint8 0-255)
-* 1 byte: Color depth (uint8) encoded as (color depth/3 -1). e.g., 24bit color = 7. *This only uses 3 bits, so there are 5 bits available for future use*
-* N bits: Image data. Binary stream of pixel data in the sequence determined by the pseudo random number generator algorithim starting with the pixel associated with the Packet ID. Bit depth for each channel is determined by color depth.
-  * Full color (YCbCr) pixels listed first as a binary stream in YCbCr format for the number of full color images determined in the header
-  * Black and white (Y only) pixels follow in a binary stream of Y values
-  * zero padding for byte alignment as needed for packet protocol. If encoding in base91 (below), zero padding not required.
-
-#### Pseudo-random Number Generation for Picking Pixels
-Compressed sensing imaging requires that the measurements are uncorellated in the sparse domain that is used to reconstruct the image. Taking random samples ensures this condition, however, both the transmitter and receiver need to know which pixel values correspond to which pixels in the image. To do this, PCSI uses a "Linear Congruential Generator" (https://en.wikipedia.org/wiki/Linear_congruential_generator) as a pseudo-random number generator using gcc's default coefficients (modulus=2^31, a=1103515245, c=12345, starting with a seed=1) and combined with the modern "Fisher Yates shuffle algorithm"  https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm to generate a random list of the pixels to be sent. See reference code for details. This will allow all receivers and the transmitter to generate identical lists of order that pixels will be transmitted. Since every packet has the same number of pixels, the packet ID will give the receiver the starting pixel number from which the list of pixels received in the packet can be extracted.
-
-Pixels are indexed column-first, not row first as is typically done in Python. You therefore have to transpose a matrix before selecting and assigning pixels.
-
-#### PCSI Payload base91 Encoding
-If transmitting over channels the require/prefer printable ascii text, the binary stream can be converted to base91 in the following way. This is combination of APRS base91 and basE91 (http://base91.sourceforge.net/). Compared to basE91, this is simpler and deterministic at the cost of slightly more overhead
-1. While there are 13 bits or more to convert, read in 13 bits
-   1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
-1. Next, if there are less than thirteen and 7 or more bits available (the end of the stream)
-   1. Read in and zero pad (to the right) the remaining bits so that there are 13 bits total.
-   1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
-1. If there are 6 or few bits remaining
-   1. Read in and zero pad (to the right) the remaining its so that there are 6 bits total.
-   1. Convert those 6 bits to one ASCII byte using bits+33
-
-### AX.25 and APRS compatible packets
-PCSI can be sent as the information field in simple AX.25 UI packets as described above. Additionally, with a few modifications, PCSI may be sent as AX.25 APRS compatible packets by the following:
-* The AX.25 Destination Address is set to PCSI with an SSID chosen by user. This indicates a PCSI altnet intended for anyone interested in PCSI to see. *IS THIS CORRECT? SHOULD IT BE APZXXX INSTEAD?*
-* The information field of the AX.25 packet has the following format
-  * 3 Bytes: `{% raw %}{{V{% endraw %}`
-    * Per the APRS spec, `{% raw %}{{V{% endraw %}` indicates an experimental user-defined packet, and V is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
-  * The total number of bytes in the information field will be less than or equal to 256 bytes.
-
-## Reconstructing PCSI Images
-There is no specefication or standard on how to reconstruct the images. Users can experiment with different methods and find what is appropriate. The reference implementation follows these steps (based off of http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/)
-1. Decode all the pixel values and pixel numbers from as many packets as have been successfully received.
-1. For each color channel (Y, Cb, Cr), use OLW-QN for basis pursuit https://en.wikipedia.org/wiki/Limited-memory_BFGS#OWL-QN to find the discrete cosine transform (DCT) coefficients that best fit the received data AND minimizes the L1 norm. This is the key to compressed sensing! Reference python implementation uses https://bitbucket.org/rtaylor/pylbfgs/src/master/
-1. After finding the DCT coefficients, use the inverse DCT to generate the color channels for the image.
-1. Convert from YCbCr to RBG, and save the image!
+### Receiving Images
+See the video below and the following instructions:
+![Receiving Demo](./receivePCSI.gif)
+1. Open pcsiGUI.exe.
+1. Connect to your TNC using serial or TCP connection as described above.
+1. Click "Choose Directory" if you'd like to change the directory data will be saved. Data will be continiously saved from ALL images you receive simultaneously, even the ones you aren't actively previewing in the program!
+1. Click "RX Start." You are now analyzing the packets your TNC is picking up. If images are present, the list below will begin to populate
+1. To preview an image, click on the name of the image you'd like to see, then click "Select Image Preview." The image will be previewed in the program. Red pixels indicate pixels where B&W data has been received. Cyan/blue-ish pixels indicated pixels where full color data has been received.
+1. Now it's time for the magic - use PCSI to reconstruct the image! Click "Process PCSI," which will start the PCSI process. The reconstructed image will appear on the screen and automatically update as packets are received. The raw data and processed images will be saved where you selected.
