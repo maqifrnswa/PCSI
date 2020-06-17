@@ -106,17 +106,6 @@ connectedVar.set("Not connected")
 ttk.Label(serialframe,textvar=connectedVar).grid(column=0, row=3,columnspan=2,sticky=(N,W,E))
 
 
-def kissON(*args):
-    global ser
-    ser.write('KISS ON\r'.encode())
-    ser.flush()
-    ser.write('RESTART\r'.encode())
-    ser.flush()
-    ser.read(100)  # flush buffer
-
-ttk.Button(serialframe,text="Enable KISS",command=kissON).grid(column=0, row=4,columnspan=2,sticky=(N,W,E))
-
-
 kisstcpframe = ttk.Labelframe(mainframe,text="KISS TCP Config",padding=defaultPadding)
 kisstcpframe.grid(column=0, row=3, sticky=(N, W, E, S))
 ttk.Label(kisstcpframe,text="Host:").grid(column=0, row=0,sticky=(N,W))
