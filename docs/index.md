@@ -43,9 +43,9 @@ See the following video and text below. In the video, PCSI is controlled on the 
 1. Connect PCSI to your TNC using either serial or TCP KISS connections. For serial, select your device from the list and click "connect." for TCP, enter your hostname and port and hit connect.
 1. Click the "Load Image" button to load an image. Images will be cropped to be multiples of 16 pixels in width or height. 320x240 (typical SSTV resolution) work well.
 1. Configure PCSI for transmission:
-  1. TX Bit Depth: How accurate would like like the color transmitted? This number must be in multiples of 3. Twelve bit ("12") color is default and works well for many images. High values have better color accuracy but take longer to transmit. "True color" is 24 bit (e.g., enter "24"), 9-bit color looks like a Sega Genesis game system's display. Up to user to pick what they want.
-  1. TX Chroma Compression: The human eye resolves black and white with finer detail than color, so we don't have to send as much color information to receive the same quality image. A value of 1 indicates no compression. "20" works well for most images. Larger values is more compression and increases transmission speed while at a cost of image accuracy.
-  1. Image ID Number: give each transmission a unique number so the decoders know a new image has started.
+   1. TX Bit Depth: How accurate would like like the color transmitted? This number must be in multiples of 3. Twelve bit ("12") color is default and works well for many images. High values have better color accuracy but take longer to transmit. "True color" is 24 bit (e.g., enter "24"), 9-bit color looks like a Sega Genesis game system's display. Up to user to pick what they want.
+   1. TX Chroma Compression: The human eye resolves black and white with finer detail than color, so we don't have to send as much color information to receive the same quality image. A value of 1 indicates no compression. "20" works well for most images. Larger values is more compression and increases transmission speed while at a cost of image accuracy.
+   1. Image ID Number: give each transmission a unique number so the decoders know a new image has started.
 1. Click "TX Start/Restart." You're up and running!
 
 ### Receiving Images

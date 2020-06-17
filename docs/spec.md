@@ -66,8 +66,8 @@ If transmitting over channels the require/prefer printable ascii text, the binar
 PCSI can be sent as the information field in simple AX.25 UI packets as described above. Additionally, with a few modifications, PCSI may be sent as AX.25 APRS compatible packets by the following:
 * The AX.25 Destination Address is set to PCSI with an SSID chosen by user. This indicates a PCSI altnet intended for anyone interested in PCSI to see. *IS THIS CORRECT? SHOULD IT BE APZXXX INSTEAD?*
 * The information field of the AX.25 packet has the following format
-  * 3 Bytes: `{% raw %}{{V{% endraw %}`
-    * Per the APRS spec, `{% raw %}{{V{% endraw %}` indicates an experimental user-defined packet, and V is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
+  * 3 Bytes: `{{V`
+    * Per the APRS spec, `{{` indicates an experimental user-defined packet, and `V` is user defined data format type will we use to indicate "vision." *Maybe V or v could be used to indicate 24 bit or 12 bit color, or to indicate binary or base91?*
   * The total number of bytes in the information field will be less than or equal to 256 bytes.
 
 ## Reconstructing PCSI Images
