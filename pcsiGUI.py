@@ -91,6 +91,10 @@ def connectPort(*args):
     try:
         ser.port = portsbox.get(portsbox.curselection())
         ser.open()
+        # Some TNCs don't start with KISS mode, so doing this will turn on KISS
+        # If you are already in KISS mode, this won't do anything bad
+        ser.write('KISS ON\r'.encode())
+        ser.write('RESTART\r'.encode())
         connectedVar.set("Connected: " + portsbox.get(portsbox.curselection()))# with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
     except serial.SerialException:
         connectedVar.set("Failed to connect")# with serial.Serial(port='/dev/ttyACM0', bytesize=8, parity='N', stopbits = 1, timeout = 1) as ser:
@@ -100,6 +104,18 @@ ttk.Button(serialframe,text="Connect",command=connectPort).grid(column=0, row=2,
 connectedVar = StringVar()
 connectedVar.set("Not connected")
 ttk.Label(serialframe,textvar=connectedVar).grid(column=0, row=3,columnspan=2,sticky=(N,W,E))
+
+
+def kissON(*args):
+    global ser
+    ser.write('KISS ON\r'.encode())
+    ser.flush()
+    ser.write('RESTART\r'.encode())
+    ser.flush()
+    ser.read(100)  # flush buffer
+
+ttk.Button(serialframe,text="Enable KISS",command=kissON).grid(column=0, row=4,columnspan=2,sticky=(N,W,E))
+
 
 kisstcpframe = ttk.Labelframe(mainframe,text="KISS TCP Config",padding=defaultPadding)
 kisstcpframe.grid(column=0, row=3, sticky=(N, W, E, S))
