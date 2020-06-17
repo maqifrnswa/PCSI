@@ -27,7 +27,7 @@ Author: KD9PDP
 License: GPL-3.0
 
 ## What is PCSI?
-PCSI is a way of transmitting imaging data over unconnected networks where receiving stations may each receive different random packets (due to corruption from noise or blocked signals) yet each receiving station can individually reconstruct the entire original image with high fidelity only with the packets it received. High quality, full frame images, can be reconstructed with as little as 10% of the original data being transmitted or received. Even if a receiver joins the broadcast mid-transmission, it will be able to reconstruct the full image.
+PCSI is a way of transmitting imaging data over unconnected networks where receiving stations may each receive different random packets (due to corruption from noise or blocked signals) yet each receiving station can individually reconstruct the entire original image with high fidelity only with the packets it received. High quality, full frame images, can be reconstructed with as little as 10% of the original data being transmitted or received. Even if a receiver joins the broadcast mid-transmission, it will be able to reconstruct the full image. For more details, click [here](./details.html).
 
 ## How to install?
 Download from the [github releases page](https://github.com/maqifrnswa/PCSI/releases). Unzip the folder. Find "pcsiGUI.exe" and double click on it to run.
