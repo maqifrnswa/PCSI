@@ -51,6 +51,7 @@ class PCSIDecoder():
         self.pixelsY = {}
         self.pixelsCbCr = {}
         self.nynx = {}
+        self.destFilter = ""
         # self.uninit=1
     def processSerial(self, rawSerial):
         """
@@ -66,6 +67,8 @@ class PCSIDecoder():
             if len(packet) > 16:
                 unkissPacket = unkissifyPacket(packet)
                 addresses, unkissPacket.pos = unax25ifyAddresses(unkissPacket)
+                if all(self.destFilter not in s for s in addresses):
+                    continue
                 controlField = unkissPacket.read(8)
                 PIDField = unkissPacket.read(8)
                 if(unkissPacket.peek(24)==b'{{V'):

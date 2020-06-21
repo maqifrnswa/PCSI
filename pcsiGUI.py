@@ -260,6 +260,7 @@ ttk.Label(rxFrame,textvar=savedirname,wraplength=200).grid(column=0, row=1, stic
 
 def receiveStart(*args):
     global receiving
+    decoder.destFilter = destFilter.get()
     receiving = True
     receiveStatus.set("RX Status: Running")
 
@@ -272,14 +273,18 @@ def receiveStop(*args):
 
 decoder = PCSIDecoder()
 receiving = False
-ttk.Button(rxFrame, text = "RX Start", command = receiveStart).grid(column=0, row=2, sticky=N)
-ttk.Button(rxFrame, text = "RX Stop", command = receiveStop).grid(column=0, row=3, sticky=N)
+ttk.Label(rxFrame, text = "Address Filter:").grid(column=0, row=2, sticky=N)
+addressFilter = StringVar(value="PCSI")
+ttk.Entry(rxFrame, textvariable = addressFilter).grid(column=0, row=3, sticky=N)
+
+ttk.Button(rxFrame, text = "RX Start", command = receiveStart).grid(column=0, row=4, sticky=N)
+ttk.Button(rxFrame, text = "RX Stop", command = receiveStop).grid(column=0, row=5, sticky=N)
 receiveStatus = StringVar()
 receiveStatus.set("RX Status: Stopped")
-ttk.Label(rxFrame, textvariable=receiveStatus).grid(column=0, row=4, sticky=N)
+ttk.Label(rxFrame, textvariable=receiveStatus).grid(column=0, row=6, sticky=N)
 receivedImgs = StringVar()
 receivedList = Listbox(rxFrame, listvariable=receivedImgs, height=5)
-receivedList.grid(column=0, row=5,sticky=(N,W,E))
+receivedList.grid(column=0, row=7,sticky=(N,W,E))
 
 
 def displayArrayImage(choosenImageSelected):
@@ -301,13 +306,13 @@ def chooseImage(*args):
     displayArrayImage(choosenImageSelected)
 
 
-ttk.Button(rxFrame, text = "Select Image Preview", command = chooseImage).grid(column=0, row=6, sticky=N)
+ttk.Button(rxFrame, text = "Select Image Preview", command = chooseImage).grid(column=0, row=8, sticky=N)
 choosenImage=StringVar()
-ttk.Label(rxFrame, textvar=choosenImage).grid(column=0, row=7, sticky=N)
+ttk.Label(rxFrame, textvar=choosenImage).grid(column=0, row=9, sticky=N)
 choosenImageData=StringVar()
-ttk.Label(rxFrame, textvar=choosenImageData).grid(column=0, row=8, sticky=N)
+ttk.Label(rxFrame, textvar=choosenImageData).grid(column=0, row=10, sticky=N)
 choosenImageProgress=StringVar()
-ttk.Label(rxFrame, textvar=choosenImageProgress).grid(column=0, row=9, sticky=N)
+ttk.Label(rxFrame, textvar=choosenImageProgress).grid(column=0, row=11, sticky=N)
 
 processing = False
 
@@ -324,10 +329,10 @@ def processStop(*args):
     processText.set("Stopped PCSI")
 
 
-ttk.Button(rxFrame, text = "Process PCSI", command = processStart).grid(column=0, row=10, sticky=N)
-ttk.Button(rxFrame, text = "Stop PCSI", command = processStop).grid(column=0, row=11, sticky=N)
+ttk.Button(rxFrame, text = "Process PCSI", command = processStart).grid(column=0, row=12, sticky=N)
+ttk.Button(rxFrame, text = "Stop PCSI", command = processStop).grid(column=0, row=13, sticky=N)
 processText = StringVar()
-ttk.Label(rxFrame, textvar=processText).grid(column=0, row=12, sticky=N)
+ttk.Label(rxFrame, textvar=processText).grid(column=0, row=14, sticky=N)
 
 
 pcsiRunning = False
@@ -393,7 +398,10 @@ def processControls(*args):
             practicedata = 0
         #print(newdata)
         if newdata:
-            decoder.processSerial(newdata)
+            try:
+                decoder.processSerial(newdata)
+            except Exception as e:
+                print("Error decoding: {}".format(e))
             receivedImgs.set(list(decoder.Z.keys()))
             for key in decoder.Z.keys():
                 if key == choosenImage.get():

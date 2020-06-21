@@ -53,7 +53,9 @@ See the video below and the following instructions:
 ![Receiving Demo](./receivePCSI.gif)
 1. Open pcsiGUI.exe.
 1. Connect to your TNC using serial or TCP connection as described above.
-1. Click "Choose Directory" if you'd like to change the directory data will be saved. Data will be continiously saved from ALL images you receive simultaneously, even the ones you aren't actively previewing in the program!
+1. Set optional settings:
+   1. Click "Choose Directory" if you'd like to change the directory data will be saved. Data will be continiously saved from ALL images you receive simultaneously, even the ones you aren't actively previewing in the program!
+   1. If you want to filter incoming images, enter the name of the DEST or SOURCE callsigns. Only those images with patching callsign will be processed.
 1. Click "RX Start." You are now analyzing the packets your TNC is picking up. If images are present, the list below will begin to populate
 1. To preview an image, click on the name of the image you'd like to see, then click "Select Image Preview." The image will be previewed in the program. Red pixels indicate pixels where B&W data has been received. Cyan/blue-ish pixels indicated pixels where full color data has been received.
 1. Now it's time for the magic - use PCSI to reconstruct the image! Click "Process PCSI," which will start the PCSI process. The reconstructed image will appear on the screen and automatically update as packets are received. The raw data and processed images will be saved where you selected.
