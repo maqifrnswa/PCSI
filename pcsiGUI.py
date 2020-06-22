@@ -260,7 +260,7 @@ ttk.Label(rxFrame,textvar=savedirname,wraplength=200).grid(column=0, row=1, stic
 
 def receiveStart(*args):
     global receiving
-    decoder.destFilter = destFilter.get()
+    decoder.destFilter = addressFilter.get()
     receiving = True
     receiveStatus.set("RX Status: Running")
 
