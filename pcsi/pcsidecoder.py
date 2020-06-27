@@ -63,6 +63,13 @@ class PCSIDecoder():
         """
         rawSerial = BitStream(self.serialBuffer+rawSerial)
         raw = [s for s in rawSerial.split('0xc0', bytealigned = True)]
+
+        # if you have at least 1 whole packet, there >= 3 elements in "raw"
+        # '', [data], and ['0xc0']
+        if len(raw) < 3:
+            self.serialBuffer = rawSerial.tobytes()
+            return  # need more data!
+
         for packet in raw[:-1]:
             if len(packet) > 16:
                 unkissPacket = unkissifyPacket(packet)
@@ -128,4 +135,4 @@ class PCSIDecoder():
                 # self.Z = ycbcr2rgb(self.Z.astype(float))
                 self.pixelsY[hashID].update(pixelID)
                 self.pixelsCbCr[hashID].update(pixelID[:len(pixelCrData)])
-                self.serialBuffer = raw[-1].tobytes()
+        self.serialBuffer = raw[-1].tobytes()
