@@ -177,10 +177,11 @@ ccVar.set("20")
 ttk.Label(txinfoFrame, text="TX Chroma Compression:").grid(column=0, row=2, sticky=(N, W, E))
 ttk.Entry(txinfoFrame, textvariable=ccVar, width=8).grid(column=0,row=3, sticky=(N,W,E))
 
-ttk.Label(txinfoFrame, text="Number of Packets:").grid(column=0, row=4, sticky=(N, W, E))
-numpacketVar = StringVar()
-numpacketVar.set("CURRENTLY NOT USED")
-ttk.Entry(txinfoFrame, textvariable=numpacketVar).grid(column=0, row=5, sticky=(N, W, E))
+# below is not implimented yet:
+#ttk.Label(txinfoFrame, text="Number of Packets:").grid(column=0, row=4, sticky=(N, W, E))
+#numpacketVar = StringVar()
+#numpacketVar.set("CURRENTLY NOT USED")
+#ttk.Entry(txinfoFrame, textvariable=numpacketVar).grid(column=0, row=5, sticky=(N, W, E))
 
 ttk.Label(txinfoFrame, text="Image ID number:").grid(column=0, row=6, sticky=(N, W, E))
 imageidVar = StringVar()
@@ -189,8 +190,9 @@ ttk.Entry(txinfoFrame, textvariable=imageidVar).grid(column=0, row=7, sticky=(N,
 
 def simulateTX(*args):
     pass
-    #numpix = numPixelsSent(1, bitdepthVar.get(), ccVar.get(), infoBytes.get())
-ttk.Button(txinfoFrame, text="Simulate", command=simulateTX).grid(column=0, row=8, sticky=(N, W, E))
+
+# Below is not implemented yet
+#ttk.Button(txinfoFrame, text="Simulate", command=simulateTX).grid(column=0, row=8, sticky=(N, W, E))
 
 ttk.Label(txinfoFrame, text="Max Packets/Min:").grid(column=0, row=9, sticky=(N, W, E))
 packetrateVar = StringVar()
@@ -285,6 +287,9 @@ ttk.Label(rxFrame, textvariable=receiveStatus).grid(column=0, row=6, sticky=N)
 receivedImgs = StringVar()
 receivedList = Listbox(rxFrame, listvariable=receivedImgs, height=5)
 receivedList.grid(column=0, row=7,sticky=(N,W,E))
+receiveScroll = ttk.Scrollbar(rxFrame, orient=VERTICAL, command=receivedList.yview)
+receiveScroll.grid(column=1, row=7, sticky=(N,S,W))
+receivedList.configure(yscrollcommand = receiveScroll.set)
 
 
 def displayArrayImage(choosenImageSelected):
