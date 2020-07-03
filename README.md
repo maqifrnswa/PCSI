@@ -47,7 +47,7 @@ I used MSYS2 and mingw64 to build on Windows. If you use that, you can follow th
 1. run `pacman -S base-devel git mingw-w64-x86_64-toolchain mingw-w64-x86_64-python-scipy mingw-w64-x86_64-python-numpy mingw-w64-x86_64-python-pyserial mingw-w64-x86_64-python-pillow mingw-w64-x86_64-python-pip` to install compilers and standard libraries
 1. exit the msys2 window, and run `mingw64.exe` in `c:\msys2`
 1. Install the remaining Python modules: `pip install bitstring imageio pyinstaller`
-1. Go grab liblbgfs `git clone https://github.com/chokkan/liblbfgs.git`. You need to make one change: open up `configure.ac`, find the line `LT_INIT()` and change it to `LT_INIT([win32-dll])`. Now you can run:
+1. Go grab liblbgfs `git clone -b patch-1 https://github.com/maqifrnswa/liblbfgs.git` You need to make one change: open up `configure.ac`, find the line `LT_INIT()` and change it to `LT_INIT([win32-dll])`. Now you can run:
    ```
    $ cd liblbfgs
    $ ./autogen.sh
