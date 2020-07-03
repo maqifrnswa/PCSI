@@ -3,7 +3,9 @@
 """
 Created on Wed Apr 29 18:29:45 2020
 
-@author: showard
+From http://www.pyrunner.com/weblog/2016/05/26/compressed-sensing-python/
+https://bitbucket.org/rtaylor/pylbfgs/src/master/
+PyLBFGS was written by Robert Taylor and is licensed under the MIT license.
 """
 
 import scipy.fftpack as spfft

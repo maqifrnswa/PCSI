@@ -62,15 +62,16 @@ class PCSIDecoder():
         good packets to unkissify
         """
         rawSerial = BitStream(self.serialBuffer+rawSerial)
+        # print(rawSerial)
         raw = [s for s in rawSerial.split('0xc0', bytealigned = True)]
-
+        print(raw)
         # if you have at least 1 whole packet, there >= 3 elements in "raw"
         # '', [data], and ['0xc0']
         if len(raw) < 3:
             self.serialBuffer = rawSerial.tobytes()
             return  # need more data!
 
-        for packet in raw[:-1]:
+        for packet in raw[1:-1]:  # skip the stuff before the first '0xc0'
             if len(packet) > 16:
                 unkissPacket = unkissifyPacket(packet)
                 addresses, unkissPacket.pos = unax25ifyAddresses(unkissPacket)

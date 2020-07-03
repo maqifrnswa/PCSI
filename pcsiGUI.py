@@ -82,12 +82,12 @@ s.grid(column=1, row=0, sticky=(N,S,W))
 portsbox.configure(yscrollcommand = s.set)
 ttk.Button(serialframe,text="Rescan Ports",command=scanPorts).grid(column=0, row=1,columnspan=2,sticky=(N,W,E))
 
-ser = serial.Serial(port=None, bytesize=8, parity='N', stopbits = 1, timeout = 0)
+ser = serial.Serial(port=None, bytesize=8, parity='N', stopbits = 1, timeout = 0, rtscts=True)
 def connectPort(*args):
     global ser
     if ser.is_open:
         ser.close()
-    ser = serial.Serial(port=None, bytesize=8, parity='N', stopbits = 1, timeout = 0)
+    ser = serial.Serial(port=None, bytesize=8, parity='N', stopbits = 1, timeout = 0, rtscts=True)
     try:
         ser.port = portsbox.get(portsbox.curselection())
         ser.open()
