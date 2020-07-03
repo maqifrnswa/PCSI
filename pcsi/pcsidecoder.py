@@ -22,8 +22,8 @@ def unkissifyPacket(packet):
     takes bitstream, returns bitstream
     """
     del packet[0:16]  # the 0xc000 from the KISS TNC, 0xC0 frame, 0x00 means data from TNC port0
-    packet.replace('0xdbdd','0xdb',bytealigned=True)
     packet.replace('0xdbdc','0xc0',bytealigned=True)
+    packet.replace('0xdbdd','0xdb',bytealigned=True)
     return packet
 
 
