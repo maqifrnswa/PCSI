@@ -46,12 +46,13 @@ def unax25ifyAddresses(packet):
 class PCSIDecoder():
     def __init__(self):
         # self.Z = np.zeros([2,2], dtype='uint8')
-        self.Z={}
+        self.Z = {}
         self.serialBuffer = b''
         self.pixelsY = {}
         self.pixelsCbCr = {}
         self.nynx = {}
         self.destFilter = ""
+        self.pixelsPerPacket = {}
         # self.uninit=1
     def processSerial(self, rawSerial):
         """
@@ -126,6 +127,7 @@ class PCSIDecoder():
                     self.pixelsY[hashID] = set()
                     self.pixelsCbCr[hashID] = set()
                     self.nynx[hashID] = (ny,nx)
+                    self.pixelsPerPacket[hashID] = len(pixelYData)
                 self.Z[hashID][:,:,0].T.flat[pixelID] = np.around(pixelYData)
                 # self.Z[:,:,0].T.flat[pixelID] <<= (8-channelBD)
                 self.Z[hashID][:,:,1].T.flat[pixelID[:len(pixelCbData)]] = np.around(pixelCbData)
