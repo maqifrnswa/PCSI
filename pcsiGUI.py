@@ -7,6 +7,7 @@ Created on Thu Jun 11 11:36:30 2020
 """
 
 from tkinter import *
+import tkinter as tk
 from tkinter import ttk, filedialog
 import os
 import time
@@ -24,7 +25,7 @@ from pcsi.pcsiolw import PCSIolw
 import pcsi.sersock
 
 
-root = Tk()
+root = tk.Tk()
 root.title("PCSI Transmit")
 
 defaultPadding="5 3 5 5"
@@ -304,7 +305,7 @@ def displayArrayImage(choosenImageSelected):
     choosenImageData.set("{:d}x{:d}={:d}px".format(ny,nx,ny*nx))
     packetsReceived = int(pixelsY/decoder.pixelsPerPacket[choosenImageSelected])
     largestPacketNum = (ny*nx)//decoder.pixelsPerPacket[choosenImageSelected]
-    choosenImageProgress.set("{0:d} packets received = {1:3.1f}%".format(packetsReceived, 100*packetsReceived/largestPacketNum)
+    choosenImageProgress.set("{0:d} packets received = {1:3.1f}%".format(packetsReceived, 100*packetsReceived/largestPacketNum))
 
 
 def chooseImage(*args):
