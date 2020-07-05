@@ -1,10 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+
+spec_root = os.path.abspath(SPECPATH)
+
 block_cipher = None
 
 
 a = Analysis(['pcsiGUI.py'],
-             pathex=['/home/showard/compressedsensing/PCSI'],
+             pathex=[spec_root],
              binaries=[],
              datas=[],
              hiddenimports=['packaging.requirements', 'pkg_resources.py2_warn', 'PIL', 'PIL._imagingtk', 'PIL._tkinter_finder','tkinter'],
