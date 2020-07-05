@@ -1,1 +1,1 @@
-pyinstaller pcsiGUI.spec
+pyinstaller pcsiGUI-linuxOF.spec

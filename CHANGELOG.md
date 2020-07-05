@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
+### Added
 
 - Issue #8: Enable hardware rts/cts handshaking and ignore data before the first
  start flag.
-- Issue #9: Explicitly import tkinter to help pyinstaller find it
+ 
+### Changed
+
 - Issue #10: Display the percentage of packets received instead of the percentage of pixels.
 
 
