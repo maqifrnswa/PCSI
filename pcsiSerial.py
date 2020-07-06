@@ -11,14 +11,10 @@ Created on Wed Mar 11 23:59:08 2020
 import re
 import os
 import numpy as np
-# import math  # used for log functions
-from bitstring import BitStream  # maybe use "Bits" instead of "BitStream"?
 import imageio
 import serial
-from pcsi.prandom import shufflePixels
 from pcsi.pcsitximage import PCSItxImage
 from pcsi.pcsikisstx import PCSIkissTX
-from pcsi.base91 import isBase91, base91tobytes
 from pcsi.pcsidecoder import PCSIDecoder
 
 

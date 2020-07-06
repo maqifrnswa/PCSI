@@ -10,8 +10,9 @@ import imageio
 # import math  # used for log functions
 # from bitstring import BitStream  # maybe use "Bits" instead of "BitStream"?
 import bitstring
-from pcsi.base91 import base91tobytes, bytestoBase91, isBase91
-from pcsi.colorconv import rgb2ycbcr, ycbcr2rgb, numPixelsSent
+import cv2
+from pcsi.base91 import bytestoBase91
+from pcsi.colorconv import numPixelsSent
 from pcsi.prandom import shufflePixels
 
 
@@ -45,7 +46,7 @@ class PCSItxImage:
         # must be multiples of 16
         Xorig = Xorig[0:Xorig.shape[0]//16*16,0:Xorig.shape[1]//16*16,:]
 
-        self.XYCbCr = rgb2ycbcr(Xorig)  # needs to be multiples of 16
+        self.XYCbCr = cv2.cvtColor(Xorig, cv2.COLOR_BGR2YCrCb)  # opencv switches the order of B and R, so this works
         self.ny, self.nx, self.nchan = Xorig.shape
         self.numYCbCr, self.numY = numPixelsSent(1,
                                                  bitDepth,

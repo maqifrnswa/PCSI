@@ -8,7 +8,8 @@ import os
 import numpy as np
 import argparse
 import imageio
-from pcsi.colorconv import rgb2ycbcr, ycbcr2rgb, numPixelsSent
+import cv2
+from pcsi.colorconv import numPixelsSent
 from pcsi.pcsiolw import PCSIolw
 
 if __name__=="__main__":
@@ -49,7 +50,7 @@ if __name__=="__main__":
     if not os.path.exists(args.outfolder):
         os.makedirs(args.outfolder)
 
-    Xorig = rgb2ycbcr(Xorig)
+    Xorig = cv2.cvtColor(Xorig, cv2.COLOR_BGR2YCrCb)  # opencv switchs b and r, so this works
     ny,nx,nchan = Xorig.shape
 
     for chromaCompression in chromaCompressionList:
@@ -105,7 +106,7 @@ if __name__=="__main__":
                 pcsiSolver = PCSIolw(nx, ny, b, ri)
                 Z[i][:,:,j] = pcsiSolver.go().astype('uint8')
 
-            Z[i][:,:,:] = ycbcr2rgb(Z[i][:,:,:])
+            Z[i][:,:,:] = cv2.cvtColor(Z[i][:,:,:], cv2.COLOR_YCrCb2BGR)
             imageio.imwrite(args.outfolder + '/' + imagefileName + str(numberPackets[i]) +'p_'
                             + str(transmittedColorDepth) + 'b_'
                             + str(chromaCompression) +'.bmp', Z[i])

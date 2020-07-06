@@ -17,7 +17,7 @@ import serial.tools.list_ports
 from PIL import ImageTk, Image
 import imageio
 import numpy as np
-from pcsi.colorconv import numPixelsSent, ycbcr2rgb
+import cv2
 from pcsi.pcsitximage import PCSItxImage
 from pcsi.pcsikisstx import PCSIkissTX
 from pcsi.pcsidecoder import PCSIDecoder
@@ -367,7 +367,7 @@ def pcsiThread(imageSelected, X, nynx, pixelsY, pixelsCbCr):
     Z[:,:,1] = pcsiSolverCb.go().astype('uint8')# choosenImage.get()
     pcsiSolverCr = PCSIolw(nx, ny, bCr, riCbCr)
     Z[:,:,2] = pcsiSolverCr.go().astype('uint8')# choosenImage.get()
-    Z=ycbcr2rgb(Z)
+    Z=cv2.cvtColor(Z, cv2.COLOR_YCrCb2BGR)  # open CV switches order of channels, so this works
     imagedata = Image.fromarray(Z)
     imagedata.thumbnail([320,240])
     imagedata=ImageTk.PhotoImage(imagedata)
