@@ -12,7 +12,7 @@ PyLBFGS was written by Robert Taylor and is licensed under the MIT license.
 
 import numpy as np
 from pylbfgs import owlqn
-from pcsi.discretecos import idct2, dct2
+from cv2 import dct, idct
 
 
 class PCSIolw:
@@ -32,7 +32,7 @@ class PCSIolw:
         x2 = x.reshape((self.nx, self.ny)).T
 
         # Ax is just the inverse 2D dct of x2
-        Ax2 = idct2(x2)
+        Ax2 = idct(x2)
 
         # stack columns and extract samples
         Ax = Ax2.T.flat[self.ri].reshape(self.b.shape)
@@ -46,7 +46,7 @@ class PCSIolw:
         Axb2.T.flat[self.ri] = Axb  # fill columns-first
 
         # A'(Ax-b) is just the 2D dct of Axb2
-        AtAxb2 = 2 * dct2(Axb2)
+        AtAxb2 = 2 * dct(Axb2)
         AtAxb = AtAxb2.T.reshape(x.shape)  # stack columns
 
         # copy over the gradient vector
@@ -58,7 +58,7 @@ class PCSIolw:
         Xat2 = owlqn(self.nx*self.ny, self.evaluate, None, 5)
         # transform the output back into the spatial domain
         Xat = Xat2.reshape(self.nx, self.ny).T # stack columns
-        Xa = idct2(Xat)
+        Xa = idct(Xat)
         Xa[Xa < 0] = 0
         Xa[Xa>255] = 255
         return Xa
