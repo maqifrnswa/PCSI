@@ -58,10 +58,10 @@ Since each packet contains information of the whole frame, each packet **MUST** 
 Given a bitmapped image to transfer, follow the following procedures
 1. Using a pseudo-random number generator, generate the sequence of pixels to be transmitted
 1. Given the number of bits available in the payload (e.g., AX.25 UI frames have 256 bytes minus 7 bytes of image info equals 1992 bits total), the desired chroma compression level, and the desired color bit depth to transmit, determine the list of pixels to transmit that will be full color and solely back and white.
-   1. All packets consist of the same number of pixels (e.g., every packet for an image has exactly 25 YCbCr pixels and 75 Y only pixels for a total of 100 pixels. You can choose whatever numbers you want, as long as they are the same for every packet of the image).
+    1. All packets consist of the same number of pixels (e.g., every packet for an image has exactly 25 YCbCr pixels and 75 Y only pixels for a total of 100 pixels. You can choose whatever numbers you want, as long as they are the same for every packet of the image).
 1. Prepare the packet payload
-   1. Convert full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec.
-   1. If color bit depth is being reduced, approximate the value to be transmitted using rounding. For example, the 8 bit number 200 will be represented as the 4 bit number `round(200/255*127)=100`.
+    1. Convert full color pixels to YCbCr per ITU-T T.871 https://en.wikipedia.org/wiki/YCbCr#JPEG_conversion and black and white only pixels to Y per the same spec.
+    1. If color bit depth is being reduced, approximate the value to be transmitted using rounding. For example, the 8 bit number 200 will be represented as the 4 bit number `round(200/255*127)=100`.
 
 
 #### Pseudo-random Number Generation for Picking Pixels
@@ -72,13 +72,13 @@ Pixels are indexed column-first as seen in C, not row first as is typically done
 #### PCSI Payload base91 Encoding
 If transmitting over channels the require/prefer printable ascii text, the entire PDP can be converted to base91 as described below. This is a combination of APRS base91 and basE91 (http://base91.sourceforge.net/). Compared to basE91, this is simpler and deterministic at the cost of slightly more overhead
 1. While there are 13 bits or more to convert, read in 13 bits
-   * Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
+    1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
 1. Next, if there are less than thirteen and 7 or more bits available (the end of the stream)
-   * Read in and zero pad (to the right) the remaining bits so that there are 13 bits total.
-   * Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
+    1. Read in and zero pad (to the right) the remaining bits so that there are 13 bits total.
+    1. Convert those 13 bits to two ASCII bytes using \[floor(bits/91)+33\] for first and \[bits%91+33\] for the second byte
 1. If there are 6 or few bits remaining:
-   * Read in and zero pad (to the right) the remaining bits so that there are 6 bits total.
-   * Convert those 6 bits to one ASCII byte using bits+33
+    1. Read in and zero pad (to the right) the remaining bits so that there are 6 bits total.
+    1. Convert those 6 bits to one ASCII byte using bits+33
 
 ### AX.25 and APRS compatible packets
 PCSI can be sent as the information field in simple AX.25 UI packets as described above. Additionally, with a few modifications, PCSI may be sent as AX.25 APRS compatible packets. While use of PCSI over APRS VHF frequencies is discouraged, you can set up APRS compatible hardware and software on other frequencies to be used with PCSI. APRS compatible AX.25 packets can be sent by doing the following:
