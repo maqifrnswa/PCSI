@@ -7,14 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- Issue #8: Enable hardware rts/cts handshaking and ignore data before the first
- start flag.
  
 ### Changed
 
+- Issue #8: Enable hardware rts/cts handshaking and ignore data before the first
+ start flag.
 - Issue #10: Display the percentage of packets received instead of the percentage of pixels.
+- Replaced SciPy dependency with OpenCV
 
 
 ## [0.0.0] - 2020-06-28
