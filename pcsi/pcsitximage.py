@@ -53,7 +53,7 @@ class PCSItxImage:
                                                  chromaCompression,
                                                  payloadImageBits)
         self.pixelList = shufflePixels(self.ny, self.nx)
-        self.largestFullPacketNum = self.ny*self.nx//(self.numYCbCr+self.numY)
+        self.largestFullPacketNum = self.ny*self.nx//(self.numYCbCr+self.numY)-1
 
     def genPayload(self, packetNum):
         header = bitstring.pack(
