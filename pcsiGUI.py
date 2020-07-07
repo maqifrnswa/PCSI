@@ -304,7 +304,7 @@ def displayArrayImage(choosenImageSelected):
     pixelsY= len(decoder.pixelsY[choosenImageSelected]) # number of pix received, effectively
     choosenImageData.set("{:d}x{:d}={:d}px".format(ny,nx,ny*nx))
     packetsReceived = int(pixelsY/decoder.pixelsPerPacket[choosenImageSelected])
-    largestPacketNum = ((ny*nx)//decoder.pixelsPerPacket[choosenImageSelected])-1
+    largestPacketNum = ((ny*nx)//decoder.pixelsPerPacket[choosenImageSelected])
     choosenImageProgress.set("{0:d} packets received = {1:3.1f}%".format(packetsReceived, 100*packetsReceived/largestPacketNum))
 
 
