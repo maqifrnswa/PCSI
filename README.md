@@ -22,7 +22,9 @@ PCSI is a way of transmitting imaging data over unconnected networks where recei
 **pcsiSerial.py** is a work in progress. So far it transmits AX.25 PCSI frames.
 
 ## How to install
-Precompiled GUI packages are available under "releases." 64-bit Windows and 64-bit Linux releases are available, and if someone provides Mac ones I can share them as well.
+RPrecompiled GUI packages are available under "releases." 64-bit Windows and 64-bit Linux releases are available, and if someone provides Mac ones I can share them as well.
+
+Bleeding edge development snapshots are available for Windows here: https://ci.appveyor.com/project/maqifrnswa/pcsi. Go to "artifacts" above the console window and choose "pcsiGUI.zip" to download. For cutting edge linux use, just clone this repository and install the needed python packages.
 
 Raspbian CLI packages can be made, eventually, but for now see the build instructions below.
 
