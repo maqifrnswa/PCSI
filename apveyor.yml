@@ -1,0 +1,33 @@
+image:
+- Visual Studio 2019
+- Ubuntu
+- macos
+
+stack: python 3
+
+environment:
+  PYTHON: C:\\Python38-x64
+
+init:
+- cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+
+install:
+- python --version
+- python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
+
+build_script:
+- pyinstaller pcsiGUI-linuxOD.spec
+
+artifacts:
+- path: dist\pcsiGUI
+  name: pcsiGUI-$(APPVEYOR_BUILD_WORKER_IMAGE)$(PLATFORM)
+
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  auth_token:
+    secure: 4PhCdC/CzF+nHR8T/hiD2kw0480iD4ap4rf4pN5+eXvF3Mfn0EvQFZookOv1xO/5
+  repository: maqifrnswa/pcsi
+  artifact: pcsiGUI-$(APPVEYOR_BUILD_WORKER_IMAGE)$(PLATFORM)
+  on:
+    APPVEYOR_REPO_TAG: true

@@ -40,7 +40,7 @@ You can also build/run it yourself. You need the following:
 
 ### Windows build instructions
 You just need any Python installation/package.
-1. install the needed Python packages. Use a venv if you'd like, or just `pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow'
+1. install the needed Python packages. Use a venv if you'd like, or just `pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow`
 1. Grab this repository using git (if you have git installed `git clone https://github.com/maqifrnswa/PCSI.git`) or just downloading it from (https://github.com/maqifrnswa/PCSI.git).
 1. Enter the directory `cd PCSI` and run the GUI or whatever command you want to use e.g., `python3 pcsiGUI.py`
 1. If you want to build your own executable, check out `dist.sh` for hints and `pip install pyinstaller`.
