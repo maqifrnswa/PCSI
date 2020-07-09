@@ -10,8 +10,9 @@ https://bitbucket.org/rtaylor/pylbfgs/src/master/
 PyLBFGS was written by Robert Taylor and is licensed under the MIT license.
 """
 
+import time
 import numpy as np
-from pylbfgs import owlqn
+import lbfgs
 from cv2 import dct, idct
 
 
@@ -21,8 +22,9 @@ class PCSIolw:
         self.ny = ny
         self.b = b
         self.ri = ri
+        self.lastXat2 = np.zeros(nx*ny)
 
-    def evaluate(self, x, g, step):
+    def evaluate(self, x, g):
         """An in-memory evaluation callback."""
         # we want to return two things:
         # (1) the norm squared of the residuals, sum((Ax-b).^2), and
@@ -55,7 +57,12 @@ class PCSIolw:
         return fx
 
     def go(self):
-        Xat2 = owlqn(self.nx*self.ny, self.evaluate, None, 5)
+        # Xat2 = owlqn(self.nx*self.ny, self.evaluate, None, 5)
+        print("Starting optimizations")
+        starttime = time.time()
+        Xat2 = lbfgs.fmin_lbfgs(self.evaluate, self.lastXat2, orthantwise_c=5)
+        print("Optimization found after {0:0.1f} seconds.".format(time.time()-starttime))
+        self.lastXat2 = Xat2
         # transform the output back into the spatial domain
         Xat = Xat2.reshape(self.nx, self.ny).T # stack columns
         Xa = idct(Xat)

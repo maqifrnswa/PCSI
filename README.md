@@ -28,42 +28,25 @@ Raspbian CLI packages can be made, eventually, but for now see the build instruc
 
 ## Build instructions
 You can also build/run it yourself. You need the following:
-* liblbfgs (https://github.com/chokkan/liblbfgs)
 * Python 3 and the following Python packages
   * OpenCV (opencv-python)
   * NumPy
   * ImageIO
   * BitString
-  * PyLBFGS (rtaylor version https://bitbucket.org/rtaylor/pylbfgs)
+  * PyLBFGS (includes pre-built [liblbfgs](https://github.com/chokkan/liblbfgs))
   * PySerial
   * Pillow
   * PyInstaller (optional, if you want to build executable files)
 
 ### Windows build instructions
-I used MSYS2 and mingw64 to build on Windows. If you use that, you can follow the same instructions below as if you had Linux/MacOS.
-1. Download and install MSYS2 (https://www.msys2.org/)
-1. open up `c:\msys2` and run msys2.exe
-1. run `pacman -Syu` to update your packages
-1. run `pacman -S base-devel git mingw-w64-x86_64-toolchain mingw-w64-x86_64-opencv mingw-w64-x86_64-python-numpy mingw-w64-x86_64-python-pyserial mingw-w64-x86_64-python-pillow mingw-w64-x86_64-python-pip` to install compilers and standard libraries
-1. exit the msys2 window, and run `mingw64.exe` in `c:\msys2`
-1. Install the remaining Python modules: `pip install bitstring imageio pyinstaller`
-1. Go grab liblbgfs `git clone -b patch-1 https://github.com/maqifrnswa/liblbfgs.git` You need to make one change: open up `configure.ac`, find the line `LT_INIT()` and change it to `LT_INIT([win32-dll])`. Now you can run:
-   ```
-   $ cd liblbfgs
-   $ ./autogen.sh
-   $ ./configure --enable-sse2
-   $ make
-   $ make install  # To install libLBFGS library and header.
-   ```
-1. Grab rtaylor's pylbfgfs `cd ~` then `git clone https://bitbucket.org/rtaylor/pylbfgs.git`.
-1. Enter the directory `cd pylbgfs` then build and install by typing `python setup.py install`
-1. Grab this repository `cd ~` and `git clone https://github.com/maqifrnswa/PCSI.git`
+You just need any Python installation/package.
+1. install the needed Python packages. Use a venv if you'd like, or just `pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow'
+1. Grab this repository using git (if you have git installed `git clone https://github.com/maqifrnswa/PCSI.git`) or just downloading it from (https://github.com/maqifrnswa/PCSI.git).
 1. Enter the directory `cd PCSI` and run the GUI or whatever command you want to use e.g., `python3 pcsiGUI.py`
-1. If you want to build your own executable, check out `dist.sh` for hints
+1. If you want to build your own executable, check out `dist.sh` for hints and `pip install pyinstaller`.
 
 ### Linux build instructions
 1. Install Python modules above (either pip, virtual env, or distribution packages e.g., `sudo apt-get install python3-numpy`). All should be available except for the rtaylor pylbfgs. Follow the Windows instructions above to download and install it.
-1. To install liblbfgs you can install the distribution version or build your own. On Debian based systems (e.g., Ubuntu, Raspbian), `sudo apt-get instal liblbfgs` will install the library, but it won't have sse2 optimizations (so will be a little slower on desktop computers that have sse2 capabillities). If you have a processor that has SSE2 instructoins (i.e., a desktop computer), you can build and install an optimized, faster library yourself following the instructions https://github.com/chokkan/liblbfgs using `configure --enable-sse2`. Raspberry Pis should just use the distribution version since there is no sse2 on RPis.
 1. Download this project, and run the command you'd like, e.g., `python3 pcsiGUI.py`.
 
 ### MacOS build instructions
