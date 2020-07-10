@@ -53,6 +53,7 @@ class PCSItxImage:
                                                  chromaCompression,
                                                  payloadImageBits)
         self.pixelList = shufflePixels(self.ny, self.nx)
+        # First packet number is 0, so the largest one is tot_pix//(pix_packet) -1
         self.largestFullPacketNum = self.ny*self.nx//(self.numYCbCr+self.numY)-1
 
     def genPayload(self, packetNum):
@@ -61,7 +62,7 @@ class PCSItxImage:
                 self.imageID,
                 int(self.ny/16),
                 int(self.nx/16),
-                packetNum,
+                packetNum % (self.largestFullPacketNum+1),
                 self.numYCbCr,
                 int(self.bitDepth/3-1))
         startingPixel = packetNum * (self.numYCbCr + self.numY)

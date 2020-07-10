@@ -16,9 +16,9 @@ The reference software included here allows you to:
 * Connect to hardware TNCs using KISS serial or KISS TCP connections
 * Connect to sound card modems such as fldigi or direworlf to use any of those modes and hardware!
 * Therefore it's compatible with HF modes using fldigi or anything that accepts KISS connections
-* The software transmits packets compatible with the APRS network, so it is possible to relay images using the APRS network. (Use this with caution as APRS networks may not have the spare capacity in all regions, and images that are not timely or tactical may not be well suited for APRS.)
+* The software transmits packets compatible with the APRS hardware and software, so it is possible to relay images using them. (However, you should avoid using APRS frequencies. Instead, use frequency OBJECTS on APRS to indicate the frequency your images will be broadcast.)
 
-Also included is the specification for the [pseudorandom data packet (PDP) protocol](./spec.md) that enables PCSI.
+Also included is the specification for the [pseudorandom datagram payload (PDP) protocol](./spec.md) that enables PCSI, and a [tutorial on how PCSI works](./details.html).
 
 Development information is available on [the project Github page](https://github.com/maqifrnswa/PCSI)
 
@@ -40,7 +40,7 @@ See the following video and text below. In the video, PCSI is controlled on the 
 1. Start your TNC (hardware or software)
 1. Open pcsiGUI.exe
 1. Enter in your callsign, your destination (could be a group name like "PCSI" or another callsign). Both take an optional SSID (e.g., KD9PDP or KD9PDP-3)
-1. Enter in a comma separated list of digipeaters (optional, e.g., "WIDE1-1, WIDE2-1" without the quotes). Spaces are allowed. SSIDs are optional.
+1. Enter in a comma separated list of digipeaters (optional, e.g., "SOUTH-1, NORTH-1" without the quotes). Spaces are allowed. SSIDs are optional.
 1. Connect PCSI to your TNC using either serial or TCP KISS connections. For serial, select your device from the list and click "connect." for TCP, enter your hostname and port and hit connect.
 1. Click the "Load Image" button to load an image. Images will be cropped to be multiples of 16 pixels in width or height. 320x240 (typical SSTV resolution) work well.
 1. Configure PCSI for transmission:

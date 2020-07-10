@@ -245,6 +245,9 @@ transmitStatus=StringVar()
 ttk.Label(txinfoFrame, textvariable=transmitStatus).grid(column=0, row=12, sticky=(N, W, E))
 ttk.Button(txinfoFrame, text="TX Pause", command=transmitStop).grid(column=0, row=13, sticky=(N, W, E))
 ttk.Button(txinfoFrame, text="TX Continue", command=transmitCont).grid(column=0, row=14, sticky=(N, W, E))
+transmitPercent=StringVar()
+ttk.Label(txinfoFrame, textvariable=transmitPercent).grid(column=0, row=15, sticky=(N, W, E))
+
 
 rxFrame = ttk.Labelframe(mainframe, text="RX Control",padding=defaultPadding)
 rxFrame.grid(column=3,row=0,rowspan=3,sticky=(N, W, E, S))
@@ -304,8 +307,8 @@ def displayArrayImage(choosenImageSelected):
     pixelsY= len(decoder.pixelsY[choosenImageSelected]) # number of pix received, effectively
     choosenImageData.set("{:d}x{:d}={:d}px".format(ny,nx,ny*nx))
     packetsReceived = int(pixelsY/decoder.pixelsPerPacket[choosenImageSelected])
-    largestPacketNum = ((ny*nx)//decoder.pixelsPerPacket[choosenImageSelected])
-    choosenImageProgress.set("{0:d} packets received = {1:3.1f}%".format(packetsReceived, 100*packetsReceived/largestPacketNum))
+    totalNumPackets = ((ny*nx)//decoder.pixelsPerPacket[choosenImageSelected])
+    choosenImageProgress.set("{0:d} packets received = {1:3.1f}%".format(packetsReceived, 100*packetsReceived/totalNumPackets))
 
 
 def chooseImage(*args):
@@ -391,9 +394,11 @@ def processControls(*args):
         global kissTX
         if (time.time_ns() - kissTX.lastTime) > (60/int(packetrateVar.get())*1e9):
             kissTX.sendPacket(kissTX.currentPacket)
-            kissTX.currentPacket += 1
-            kissTX.currentPacket = kissTX.currentPacket%(kissTX.txImage.largestFullPacketNum +1)
             kissTX.lastTime = time.time_ns()
+            kissTX.currentPacket += 1  # first packet is 0
+            transmitPercent.set("{0:d} out of {1:d} packets = {2:3.1f}%".format(
+                    kissTX.currentPacket, kissTX.txImage.largestFullPacketNum,
+                    100*kissTX.currentPacket/kissTX.txImage.largestFullPacketNum))
     if receiving & (ser.is_open is False):
         print("Connect to serial port first")
         receiveStop()

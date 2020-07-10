@@ -2,8 +2,6 @@
 This repository holds the specefication and a usable reference implementation of PCSI.
 The respository contains code to simulate PCSI transmission and code to transmit & receive PCSI images using a TNC connected via KISS to transmit AX.25 frames.
 
-PCSI spec v0.0.0 (unreleased, versioning will follow semver 2.0)
-
 Author: KD9PDP
 
 License: GPL-3.0
