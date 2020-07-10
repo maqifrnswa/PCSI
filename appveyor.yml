@@ -3,8 +3,8 @@ environment:
     - job_name: win64
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PYTHON: C:\\Python38-x64
-    - job_name: macos
-      APPVEYOR_BUILD_WORKER_IMAGE: macos64
+    - job_name: macos64
+      APPVEYOR_BUILD_WORKER_IMAGE: macos
 
 stack: python 3.8
 
