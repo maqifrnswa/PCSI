@@ -1,11 +1,12 @@
-matrix:
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    PYTHON: C:\\Python38-x64
-    OSNAME: win64
-  - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-    OSNAME: linux64
-  - APPVEYOR_BUILD_WORKER_IMAGE: macos
-    OSNAME: macos64
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON: C:\\Python38-x64
+      OSNAME: win64
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      OSNAME: linux64
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos
+      OSNAME: macos64
 
 stack: python 3.8
 
