@@ -1,19 +1,22 @@
 environment:
+  PY_VER: 3.8
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      PYTHON: C:\\Python38-x64
+      PYTHON: C:\\Python$(PY_VER)38-x64
       OSNAME: win64
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       OSNAME: linux64
     - APPVEYOR_BUILD_WORKER_IMAGE: macos
       OSNAME: macos64
 
-stack: python 3.8
+stack: python $(PY_VER)
 
 init:
 - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
 install:
+- sh: echo "testing"
+- sh: sudo apt-get install python$(PY_VER)-dev
 - python --version
 - python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
 
