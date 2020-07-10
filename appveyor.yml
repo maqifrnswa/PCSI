@@ -1,10 +1,10 @@
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    - job_name: win64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       PYTHON: C:\\Python38-x64
-      OSNAME: win64
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos
-      OSNAME: macos64
+    - job_name: macos
+      APPVEYOR_BUILD_WORKER_IMAGE: macos64
 
 stack: python 3.8
 
@@ -20,7 +20,7 @@ build_script:
 
 artifacts:
 - path: dist\pcsiGUI
-  name: pcsiGUI-$(OSNAME)
+  name: pcsiGUI-$(job_name)
 
 deploy:
 - provider: GitHub
@@ -28,6 +28,6 @@ deploy:
   auth_token:
     secure: 4PhCdC/CzF+nHR8T/hiD2kw0480iD4ap4rf4pN5+eXvF3Mfn0EvQFZookOv1xO/5
   repository: maqifrnswa/pcsi
-  artifact: pcsiGUI-$(OSNAME)
+  artifact: pcsiGUI-$(job_name)
   on:
     APPVEYOR_REPO_TAG: true

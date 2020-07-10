@@ -22,11 +22,11 @@ PCSI is a way of transmitting imaging data over unconnected networks where recei
 **pcsiSerial.py** is a work in progress. So far it transmits AX.25 PCSI frames.
 
 ## How to install
-RPrecompiled GUI packages are available under "releases." 64-bit Windows and 64-bit Linux releases are available, and if someone provides Mac ones I can share them as well.
+Precompiled GUI packages are available for Windows, MacOS, and Linux at (https://github.com/maqifrnswa/PCSI/releases)
 
-Bleeding edge development snapshots are available for Windows here: https://ci.appveyor.com/api/projects/maqifrnswa/pcsi/artifacts/dist/pcsiGUI-win64.zip. It is rebuilt with every commit to this repository.
-
-Raspbian CLI packages can be made, eventually, but for now see the build instructions below.
+Bleeding edge development snapshots are available! These are built continiously, so new features and bug fixes will show up here first, but there may be new bugs. Please test them out and report issues you find here on github.
+* Windows: (https://ci.appveyor.com/api/projects/maqifrnswa/pcsi/artifacts/dist/pcsiGUI-win64.zip?job=win64)
+* MacOS: (https://ci.appveyor.com/api/projects/maqifrnswa/pcsi/artifacts/dist/pcsiGUI-macos64.zip?job=macos64)
 
 ## Build instructions
 You can also build/run it yourself. You need the following:
@@ -39,17 +39,17 @@ You can also build/run it yourself. You need the following:
   * PySerial
   * Pillow
   * PyInstaller (optional, if you want to build executable files)
+  
+These can all be installed using `python3 -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow`
 
-### Windows build instructions
-You just need any Python installation/package.
-1. install the needed Python packages. Use a venv if you'd like, or just `pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow`
-1. Grab this repository using git (if you have git installed `git clone https://github.com/maqifrnswa/PCSI.git`) or just downloading it from (https://github.com/maqifrnswa/PCSI.git).
-1. Enter the directory `cd PCSI` and run the GUI or whatever command you want to use e.g., `python3 pcsiGUI.py`
-1. If you want to build your own executable, check out `dist.sh` for hints and `pip install pyinstaller`.
-
-### Linux build instructions
-1. Install Python modules above (either pip, virtual env, or distribution packages e.g., `sudo apt-get install python3-numpy`). All should be available except for the rtaylor pylbfgs. Follow the Windows instructions above to download and install it.
+### Linux and MacOS build instructions
+1. You probably already have python installed. If not, install python version 3 from your distribution (e.g., `apt`), (Python.org), or Anaconda.
+1. Install Python modules above (either pip, virtual env, or distribution packages e.g., `sudo apt-get install python3-numpy`). All are available on PyPi so they can at least be installed using pip.
 1. Download this project, and run the command you'd like, e.g., `python3 pcsiGUI.py`.
 
-### MacOS build instructions
-Follow the Linux instructions above, but get the Python modules from Anaconda/Conda (or whatever Python distribution you are comfortable with).
+### Windows build instructions
+1. Download and install Python version 3 from (Python.org).
+1. install the needed Python packages. Use a venv if you'd like, or just `pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow` in a command window.
+1. Grab this repository using git (if you have git installed `git clone https://github.com/maqifrnswa/PCSI.git`) or just downloading it from (https://github.com/maqifrnswa/PCSI/archive/master.zip).
+1. Enter the directory `cd PCSI` and run the GUI or whatever command you want to use e.g., `python3 pcsiGUI.py`
+1. If you want to build your own executable, check out `dist.sh` for hints and `pip install pyinstaller`.
