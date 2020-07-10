@@ -10,9 +10,6 @@ environment:
 
 stack: python 3.8
 
-environment:
-  
-
 init:
 - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
