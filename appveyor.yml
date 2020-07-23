@@ -24,7 +24,9 @@ install:
 
 build_script:
 - cmd: pyinstaller pcsiGUI-linuxOD.spec
-- sh: python3 -m pyinstaller pcsiGUI-linuxOD.spec
+- sh: /Library/Frameworks/Python.framework/Versions/3.8/bin/pyinstaller pcsiGUI-linuxOD.spec
+
+on_finish:
 - sh: export APPVEYOR_SSH_BLOCK=true
 - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
