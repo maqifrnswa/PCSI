@@ -13,7 +13,7 @@ init:
 
 install:
 - python --version
-- python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
+- python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow https://github.com/pyinstaller/pyinstaller/archive/develop.zip
 
 build_script:
 - pyinstaller pcsiGUI-linuxOD.spec
