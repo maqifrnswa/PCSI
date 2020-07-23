@@ -14,11 +14,14 @@ environment:
 #- cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 #- sh: set PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
 
+#this can be cleaned up, but it's working now... Path variable keeps changing...
 install:
-- echo %PATH%
+- cmd: echo %PATH%
+- sh: echo $PATH
 - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 - sh: set PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
-- echo %PATH%
+- cmd: echo %PATH%
+- sh: echo $PATH
 - sh: curl https://www.python.org/ftp/python/3.8.5/python-3.8.5-macosx10.9.pkg -o python.pkg
 - sh: sudo installer -pkg python.pkg -target /
 - cmd: python --version
@@ -28,7 +31,8 @@ install:
 - sh: python3 -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
 
 build_script:
-- echo %PATH%
+- cmd: echo %PATH%
+- sh: echo $PATH
 - cmd: pyinstaller pcsiGUI-linuxOD.spec
 - sh: /Library/Frameworks/Python.framework/Versions/Current/bin/pyinstaller pcsiGUI-linuxOD.spec
 
