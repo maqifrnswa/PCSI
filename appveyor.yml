@@ -9,11 +9,14 @@ environment:
 
 # stack: python 3.7
 
-init:
-- cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-- sh: set PATH=/Library/Frameworks/Python.framework/Versions/3.8/bin:$PATH
+# environmental variables only live in one script, don't carry over
+#init:
+#- cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+#- sh: set PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
 
 install:
+# - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+# - sh: set PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
 - sh: curl https://www.python.org/ftp/python/3.8.5/python-3.8.5-macosx10.9.pkg -o python.pkg
 - sh: sudo installer -pkg python.pkg -target /
 - cmd: python --version
@@ -24,11 +27,11 @@ install:
 
 build_script:
 - cmd: pyinstaller pcsiGUI-linuxOD.spec
-- sh: /Library/Frameworks/Python.framework/Versions/3.8/bin/pyinstaller pcsiGUI-linuxOD.spec
+- sh: /Library/Frameworks/Python.framework/Versions/Current/bin/pyinstaller pcsiGUI-linuxOD.spec
 
-on_finish:
-- sh: export APPVEYOR_SSH_BLOCK=true
-- sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+# on_finish:
+# - sh: export APPVEYOR_SSH_BLOCK=true
+# - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
 artifacts:
 - path: dist\pcsiGUI
