@@ -7,36 +7,24 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: macos
       APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVCVYiWsKFfQn2/PqmWCH0fzwgpm4A71YlAwuTL3Rl0HHTUcXVRpgHUxEEm+eMNZbf1Sh1b840+3SkDaMmfFtbxQ6Qo+64EyZeiemYmJ3T00qMAjX++zJVEnQI8dqKDykq2cc5cLJqqRaUCiuy9uxfO5cihW/xwswdzyz4pv/xO7RlpQVcghn56DEkP2GRsrAwq71OGataJ4WK1W+/Kk19sWAZs8aQemPGMXAQp5f6PwfvCFXJDSXhkc6a7F7sE3r+nAdoXeTzhtgspeRvnnbWH48/iagEyGBmbao75/QICWXKIB+VUox2Cz65VwCcslC/PM6sEGdZgHvElKB1teLf showard@esc-303123
 
-# stack: python 3.7
-
 init:
 - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 - sh: export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
 
-#this can be cleaned up, but it's working now... Path variable keeps changing...
 install:
-- cmd: echo %PATH%
-- sh: echo $PATH
-- cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-- sh: set PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
-- cmd: echo %PATH%
-- sh: echo $PATH
 - sh: curl https://www.python.org/ftp/python/3.8.5/python-3.8.5-macosx10.9.pkg -o python.pkg
 - sh: sudo installer -pkg python.pkg -target /
 - cmd: python --version
 - sh: python3 --version
-- sh: python --version
 - cmd: python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
-- sh: python3 -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
+- sh: python3 -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow https://github.com/pyinstaller/pyinstaller/archive/develop.zip
 
 build_script:
-- cmd: echo %PATH%
-- sh: echo $PATH
 - pyinstaller pcsiGUI-linuxOD.spec
 
-# on_finish:
-# - sh: export APPVEYOR_SSH_BLOCK=true
-# - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+on_finish:
+- sh: export APPVEYOR_SSH_BLOCK=true
+- sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
 artifacts:
 - path: dist\pcsiGUI
