@@ -11,10 +11,12 @@ init:
 - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
 install:
-- sh: brew install tcl-tk pyenv
+- sh: brew install tcl-tk pyenv pyenv-virtualenv
 - sh: eval "$(pyenv init -)"
 - sh: PYTHON_CONFIGURE_OPTS="--with-tcltk-includes='-I/usr/local/opt/tcl-tk/include' --with-tcltk-libs='-L/usr/local/opt/tcl-tk/lib -ltcl8.6 -ltk8.6' --enable-framework" pyenv install 3.7.8
 - sh: pyenv global 3.7.8
+- sh: pyenv virtualenv 3.7.8 pcsienv
+- sh: pyenv activate pcsienv
 - python --version
 - python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
 
