@@ -2,28 +2,27 @@ environment:
   matrix:
     - job_name: win64
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      PYTHON: C:\\Python38-x64
+      PYTHON: C:\Python38-x64
     - job_name: macos64
       APPVEYOR_BUILD_WORKER_IMAGE: macos
       APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVCVYiWsKFfQn2/PqmWCH0fzwgpm4A71YlAwuTL3Rl0HHTUcXVRpgHUxEEm+eMNZbf1Sh1b840+3SkDaMmfFtbxQ6Qo+64EyZeiemYmJ3T00qMAjX++zJVEnQI8dqKDykq2cc5cLJqqRaUCiuy9uxfO5cihW/xwswdzyz4pv/xO7RlpQVcghn56DEkP2GRsrAwq71OGataJ4WK1W+/Kk19sWAZs8aQemPGMXAQp5f6PwfvCFXJDSXhkc6a7F7sE3r+nAdoXeTzhtgspeRvnnbWH48/iagEyGBmbao75/QICWXKIB+VUox2Cz65VwCcslC/PM6sEGdZgHvElKB1teLf showard@esc-303123
 
 init:
 - cmd: set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-- sh: export PATH=/Library/Frameworks/Python.framework/Versions/Current/bin:$PATH
 
 install:
-- sh: curl https://www.python.org/ftp/python/3.8.5/python-3.8.5-macosx10.9.pkg -o python.pkg
-- sh: sudo installer -pkg python.pkg -target /
-- cmd: python --version
-- sh: python3 --version
-- cmd: python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
-- sh: python3 -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow https://github.com/pyinstaller/pyinstaller/archive/develop.zip
+- sh: brew install tcl-tk pyenv
+- sh: pyenv init
+- sh: PYTHON_CONFIGURE_OPTS="--with-tcltk-includes='-I/usr/local/opt/tcl-tk/include' --with-tcltk-libs='-L/usr/local/opt/tcl-tk/lib -ltcl8.6 -ltk8.6' --enable-framework" pyenv install 3.7.8
+- sh: pyenv global 3.7.8
+- python --version
+- python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
 
 build_script:
 - pyinstaller pcsiGUI-linuxOD.spec
 
 on_finish:
-- sh: export APPVEYOR_SSH_BLOCK=true
+#- sh: export APPVEYOR_SSH_BLOCK=true
 - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
 artifacts:
