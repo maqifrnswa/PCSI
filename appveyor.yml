@@ -12,6 +12,7 @@ init:
 
 install:
 - sh: brew install tcl-tk pyenv pyenv-virtualenv
+#- sh: echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
 - sh: eval "$(pyenv init -)"
 - sh: PYTHON_CONFIGURE_OPTS="--with-tcltk-includes='-I/usr/local/opt/tcl-tk/include' --with-tcltk-libs='-L/usr/local/opt/tcl-tk/lib -ltcl8.6 -ltk8.6' --enable-framework" pyenv install 3.7.8
 - sh: pyenv global 3.7.8
@@ -19,12 +20,10 @@ install:
 - sh: pyenv activate pcsienv
 - python --version
 - python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
+- sh: pyenv rehash
 
 build_script:
-- sh: echo $PATH
-- sh: ls /Users/appveyor/.pyenv/shims
-- sh: /Users/appveyor/.pyenv/shims/pyinstaller pcsiGUI-linuxOD.spec
-- cmd: pyinstaller pcsiGUI-linuxOD.spec
+- pyinstaller pcsiGUI-linuxOD.spec
 
 on_finish:
 - sh: export APPVEYOR_SSH_BLOCK=true
