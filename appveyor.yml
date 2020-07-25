@@ -21,7 +21,10 @@ install:
 - python -m pip install opencv-python numpy imageio bitstring pylbfgs pyserial pillow pyinstaller
 
 build_script:
-- pyinstaller pcsiGUI-linuxOD.spec
+- sh: echo $PATH
+- sh: ls /Users/appveyor/.pyenv/shims
+- sh: /Users/appveyor/.pyenv/shims/pyinstaller pcsiGUI-linuxOD.spec
+- cmd: pyinstaller pcsiGUI-linuxOD.spec
 
 on_finish:
 - sh: export APPVEYOR_SSH_BLOCK=true
