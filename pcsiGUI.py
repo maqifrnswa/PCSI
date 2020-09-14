@@ -136,19 +136,21 @@ ttk.Label(kisstcpframe,textvar=tcpconnectedVar).grid(column=0, row=3,columnspan=
 
 
 def loadfile(*args):
+    filename = False
     filename = filedialog.askopenfilename()
-    imagefilename.set(filename)
-    imagedata=Image.open(filename)
-    croppedString = ""
-    # image must be multiples of 16px
-    if imagedata.width %16 or imagedata.height%16:
-        imagedata = imagedata.crop((0,0,imagedata.width//16*16,imagedata.height//16*16))
-        croppedString = "\nImage is CROPPED!"
-    dimVar.set(str(imagedata.width)+"x"+str(imagedata.height)+" px" + croppedString)
-    imagedata.thumbnail([320,240])
-    imagedata=ImageTk.PhotoImage(imagedata)
-    imageCanvas.create_image(0,0,image=imagedata, anchor=NW)
-    imageCanvas.image=imagedata  # see: http://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+    if filename:
+        imagefilename.set(filename)
+        imagedata=Image.open(filename)
+        croppedString = ""
+        # image must be multiples of 16px
+        if imagedata.width %16 or imagedata.height%16:
+            imagedata = imagedata.crop((0,0,imagedata.width//16*16,imagedata.height//16*16))
+            croppedString = "\nImage is CROPPED!"
+        dimVar.set(str(imagedata.width)+"x"+str(imagedata.height)+" px" + croppedString)
+        imagedata.thumbnail([320,240])
+        imagedata=ImageTk.PhotoImage(imagedata)
+        imageCanvas.create_image(0,0,image=imagedata, anchor=NW)
+        imageCanvas.image=imagedata  # see: http://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
 
 
 ttk.Button(mainframe,text="Load Image",command=loadfile).grid(column=1, row=3, sticky=(N))#, W, E, S))
